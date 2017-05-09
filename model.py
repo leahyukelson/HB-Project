@@ -22,7 +22,6 @@ class User(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(64), nullable=False)
     password = db.Column(db.String(64), nullable=False)
-    city = db.Column(db.String(64), nullable=True)
     zipcode = db.Column(db.String(15), nullable=True)
 
     def __repr__(self):

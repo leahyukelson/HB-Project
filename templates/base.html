@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <link rel="stylesheet"
+          href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.css"/>
+</head>
+
+<body>
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+            {% if 'current_user' in session %}
+                <li><a href="/logout">Log Out</a></li>
+            {% else %}
+                <li><a href="/login-form">Log In</a></li>
+                <li><a href="/create-account">Create Account</a></li>
+            {% endif %}
+        </ul>
+        <h1><a href="/">Night Out</a></h1>
+    </div>
+
+
+
+<div class="container">
+
+  <!-- Show flashed messages -->
+  {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+          <div class="alert alert-warning">{{ message }}</div>
+      {% endfor %}
+  {% endwith %}
+
+  <!-- This is where the main content goes. -->
+  {% block content %}
+      BODY OF PAGE GOES HERE VIA INHERITANCE
+  {% endblock %}
+
+</div>
+</body>
+</html>

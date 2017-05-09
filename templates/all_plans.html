@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <h2>Plans</h2>
+    <ul>
+      {% for plan in plans %}
+          <li>
+              <a href="/plans/{{ plan.plan_id }}">
+                {{ plan.plan_name }}
+              </a>
+          </li>
+      {% endfor %}
+    </ul>
+
+{% endblock %}

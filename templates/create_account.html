@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <h2>Create Account</h2>
+    <form id="new_user_form" action="/create-account" method="POST"> 
+      Email:<input type="email" id="email" name="email" default="email" required><br> 
+      Password:<input type="password" id="password" name="password" default="password" required><br>
+      First Name:<input type="text" id="first_name" name="first_name"><br>
+      Last Name:<input type="text" id="last_name" name="last_name"><br>
+      Zip Code:<input type="number" id="zip_code" name="zip_code"><br>
+      <input type="submit" id="submit_button">
+    </form>
+
+{% endblock %}
