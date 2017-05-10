@@ -1,14 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% if 'current_user' in session %}
     <h2>New Plan</h2>
-    <form id="new_user_plan" action="/add-restaurant" method="POST"> 
-      Email:<input type="email" id="email" name="email" default="email" required><br> 
-      Password:<input type="password" id="password" name="password" default="password" required><br>
-      First Name:<input type="text" id="first_name" name="first_name"><br>
-      Last Name:<input type="text" id="last_name" name="last_name"><br>
-      Zip Code:<input type="number" id="zip_code" name="zip_code"><br>
+    <form id="new_user_plan" action="/new-plan" method="POST"> 
+      Plan name:<input type="text" id="plan_name" name="plan_name"><br>
+      Event name:<input type="text" id="event_name" name="event_name" required><br>
+      Event Date:<input type="date" id="event_date" name="event_date" required><br>
+      Event Time:<input type="time" id="event_time" name="event_time" required><br>
+      Event Location Name:<input type="text" id="location" name="location"><br>
+      Event Address:<input type="text" id="address" name="address" required><br>
+      Event City:<input type="text" id="city" name="city" required>
+      Event State:<input type="text" id="state" name="state" required>
+      Event Zip:<input type="text" id="zipcode" name="zipcode" required><br>
       <input type="submit" id="submit_button">
     </form>
+
+{% else %}
+    <li><a href="/login-form">Log In</a></li>
+    <li><a href="/create-account">Create Account</a></li>
+{% endif %}
 
 {% endblock %}

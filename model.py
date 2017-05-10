@@ -28,10 +28,6 @@ class User(db.Model):
         """Provide helpful representation when printed."""
         return "<User user_id=%s email=%s>" % (self.user_id, self.email)
 
-def plandefault(context):
-    """ Allows plan name to default to event name """
-    return context.current_parameters.get('event_name')
-
 class Plan(db.Model):
     """Plan for an event."""
 
@@ -39,24 +35,27 @@ class Plan(db.Model):
 
     plan_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     plan_user_creator = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    plan_name = db.Column(db.Integer, default=plandefault)
+    plan_name = db.Column(db.Integer, nullable=False)
     event_time = db.Column(db.DateTime, nullable=False)
     event_name = db.Column(db.String(100), nullable=False)
+    event_location = db.Column(db.String(100))
     event_address = db.Column(db.String(100), nullable=False)
     event_city = db.Column(db.String(50), nullable=False)
+    event_state = db.Column(db.String(50), nullable=False)
     event_zipcode = db.Column(db.String(15), nullable=False)
-    event_latitude = db.Column(db.Float)
     event_longitude = db.Column(db.Float)
+    event_latitude = db.Column(db.Float)
     food_time = db.Column(db.DateTime)
     food_name = db.Column(db.String(100))
     food_address = db.Column(db.String(100))
     food_city = db.Column(db.String(50))
+    food_state = db.Column(db.String(50))
     food_latitude = db.Column(db.Float)
     food_longitude = db.Column(db.Float)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
-        return "<Plan plan_id=%s event_name=%s>" % (self.user_id, self.event_name)    
+        return "<Plan plan_id=%s event_name=%s>" % (self.plan_id, self.event_name)    
 
 
 class Invitee(db.Model):
@@ -86,7 +85,7 @@ class Invitee(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<Invitee invitee_id=%s plan_id=%s>" % (self.movie_id, self.plan_id)
+        return "<Invitee invitee_id=%s plan_id=%s>" % (self.invitee_id, self.plan_id)
 
 
 class UserPlan(db.Model):
