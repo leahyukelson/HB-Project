@@ -35,7 +35,7 @@ class Plan(db.Model):
 
     plan_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     plan_user_creator = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    plan_name = db.Column(db.Integer, nullable=False)
+    plan_name = db.Column(db.String(100), nullable=False)
     event_time = db.Column(db.DateTime, nullable=False)
     event_name = db.Column(db.String(100), nullable=False)
     event_location = db.Column(db.String(100))
@@ -94,8 +94,8 @@ class UserPlan(db.Model):
     __tablename__ = "userplans"
 
     user_plan_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('plans.plan_id'))
-    plan_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    plan_id = db.Column(db.Integer, db.ForeignKey('plans.plan_id'))
 
     # Define relationship to plan
     plan = db.relationship("Plan",

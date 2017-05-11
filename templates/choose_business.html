@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if 'current_user' in session %}
+    <h2>Choose a bar or restaurant! </h2>
+    <form id="add_restaurant_plan" action="/choose-restaurant" method="POST"> 
+      <h4> Bars - </h4>
+      {% for bar in bars['businesses'] %}
+      <input type="radio" name='event_food' value={{bar['name']}}>{{bar['name']}}<br>
+      {% endfor %}
+      <h4> Restaurants - </h4>
+      {% for rest in restaurants['businesses'] %}
+      <input type="radio" name='event_food' value={{rest['name']}}>{{rest['name']}}<br>
+      {% endfor %}
+      <input type="submit" id="submit_button">
+    </form>
+
+{% else %}
+    <li><a href="/login-form">Log In</a></li>
+    <li><a href="/create-account">Create Account</a></li>
+{% endif %}
+
+{% endblock %}

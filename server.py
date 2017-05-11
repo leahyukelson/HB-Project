@@ -6,6 +6,9 @@ from flask import (Flask, render_template, redirect, request, flash,
                    session)
 from model import *
 import datetime
+import requests
+from urllib import urlencode, quote
+import os
 
 
 app = Flask(__name__)
@@ -17,6 +20,29 @@ app.secret_key = "ABC"
 # silently. This is horrible. Fix this so that, instead, it raises an
 # error.
 app.jinja_env.undefined = StrictUndefined
+
+
+
+# Yelp Stuff
+def get_yelp_bearer_token():
+    """ Cache yelp token id """
+
+    # OS environ for client ID would not be accepted on Yelp side
+    data = urlencode({
+    'client_id': 's50ybEKVTcgO0rhu7bXKHA',
+    'client_secret': os.environ['YELP_CLIENT_SECRET'],
+    'grant_type': 'client_credentials',
+    })
+
+    headers = {'content-type': 'application/x-www-form-urlencoded'}
+    host = 'https://api.yelp.com'
+    path = '/oauth2/token'
+    url = '{0}{1}'.format(host, quote(path.encode('utf8')))
+    response = requests.request("POST", url, data=data, headers=headers)
+    print response.json()
+    bearer_token = response.json()['access_token']
+    return bearer_token
+
 
 @app.route('/')
 def index():
@@ -91,7 +117,7 @@ def check_login():
         if user.password == user_password:
             session['current_user'] = user_email
             flash('You are now logged in!')
-            return redirect('/plans')
+            return redirect('/new-plan')
         else:
             flash('Wrong password!')
             return redirect('/login-form')
@@ -109,12 +135,12 @@ def new_plan():
 @app.route('/new-plan', methods=['POST'])
 def add_new_plan():
     """ Adds event to user's new plan """
+
+    # Extract data from plan form
     new_plan_name = request.form.get('plan_name')
     new_event_name = request.form.get('event_name')
     new_plan_date = request.form.get('event_date')
     new_plan_time = request.form.get('event_time')
-    print("date", new_plan_date)
-    print("time", new_plan_time)
     new_event_datetime = datetime.datetime.strptime(new_plan_date + " " + new_plan_time, "%Y-%m-%d %H:%M")
     new_plan_location = request.form.get('location')
     new_plan_address = request.form.get('address')
@@ -122,29 +148,80 @@ def add_new_plan():
     new_plan_city = request.form.get('city')
     new_plan_zipcode = request.form.get('zipcode')
 
+    # If user chooses to not name plan right away - defaults to the event name
     if new_plan_name == "":
         new_plan_name = new_event_name
 
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
 
-    new_plan = Plan(plan_user_creator=current_user_id, plan_name=new_plan_name, event_name=new_event_name, event_time=new_event_datetime, event_location=new_plan_location, event_address=new_plan_address, event_state=new_plan_state, event_city=new_plan_city, event_zipcode=new_plan_zipcode)
-
-    # DEBUG
+    # Create new plan object with plan attributes
+    new_plan = Plan(plan_user_creator=current_user_id, plan_name=new_plan_name, 
+                    event_name=new_event_name, event_time=new_event_datetime, 
+                    event_location=new_plan_location, event_address=new_plan_address, 
+                    event_state=new_plan_state, event_city=new_plan_city, 
+                    event_zipcode=new_plan_zipcode)
     
+    # Add plan to Plan database
     db.session.add(new_plan)
     db.session.flush()
-    
-    print("PLAN!!!!!", new_plan)
-
     current_plan_id = new_plan.plan_id
-    new_userplan = UserPlan(user_id=current_user_id, plan_id=current_plan_id)
+    db.session.commit()
 
-    db.session.add(new_plan)
+    # Use a cookie to track which plan is being currently edited and created
+    session['current_plan'] = current_plan_id
+
+    # Add association between User and Plan in UserPlan database
+    new_userplan = UserPlan(user_id=current_user_id, plan_id=current_plan_id)
     db.session.add(new_userplan)
+    db.session.commit()
 
     # Change this to add restaurant when this is good
-    return redirect('/')
+    return redirect('/choose-restaurant')
 
+@app.route('/choose-restaurant')
+def choose_restaurant():
+    """ Allows a user to choose a restaurant to add to plan """
+    # Will default to two hours before event and one mile radius around location
+    # Future iteration - ask user how far willing to go and how much earlier they would like to meet
+    current_plan = Plan.query.get(session['current_plan'])
+    location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
+    open_at_hour = current_plan.event_time.hour - 2
+
+    headers = {
+        'Authorization': 'Bearer %s' % app.yelp_bearer_token,
+    }
+
+    bar_url_params = {
+        'term': 'bars',
+        'location': location.replace(' ', '+'),
+        'limit': 10,
+        'radius': 1600,
+    }
+
+
+    b = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=bar_url_params)
+    print b
+    bars = b.json()
+
+    rest_url_params = {
+        'term': 'restaurants',
+        'location': location.replace(' ', '+'),
+        'limit': 10,
+        'radius': 1600,
+    }
+
+    r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
+    print r
+    restaurants = r.json()
+
+    print bars
+    print restaurants
+
+    return render_template("choose_business.html", restaurants=restaurants, bars=bars)
+
+@app.route('/choose-restaurant', methods=['POST'])
+def add_plan_restaurant():
+    pass
 
 # @app.route('/plans')
 # def user_plan():
@@ -155,31 +232,7 @@ def add_new_plan():
 #     plans = db.session.query(UserPlan.plan).filter(UserPlan.user_id==current_user_id).join(User).join(Plan)
 #     return render_template('all_plans.html')
 
-# def example_plan():
-#     """Load example plan into database."""
 
-#     # New Data each time
-#     User.query.delete()
-#     Plan.query.delete()
-#     UserPlan.query.delete()
-
-#     user = User(user_id=1, first_name='Leah', last_name='Yukelson', email='leah@gmail.com', password='leah', zipcode='94114')
-#     event_time = datetime.datetime.strptime("01-Jan-2018", "%d-%b-%Y")
-#     plan = Plan(plan_user_creator=1, event_time=event_time, plan_name="NYE", event_name="New Year's Eve", event_address="1 Market St.", event_city="San Francisco", event_state="CA", event_zipcode="94105")
-#     userplan = UserPlan(user_id=1, plan_id=2)
-#     event_time = datetime.datetime.strptime("10-Dec-2017", "%d-%b-%Y")
-#     plan2 = Plan(plan_user_creator=1, event_time=event_time, plan_name="BDay", event_name="Leahs Birthday Party", event_address="2259 Kalakaua Ave.", event_city="Honolulu", event_state="HI", event_zipcode="96815")
-#     userplan2 = UserPlan(user_id=1, plan_id=2)
-#     # We need to add to the session or it won't ever be stored
-    
-#     db.session.add(user)
-#     db.session.add(plan)
-#     db.session.add(plan2)
-#     db.session.add(userplan)
-#     db.session.add(userplan2)
-
-#     # Once we're done, we should commit our work
-#     db.session.commit()
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
@@ -188,6 +241,7 @@ if __name__ == "__main__":
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)
+    app.yelp_bearer_token = get_yelp_bearer_token()
 
     # example_plan()
 
