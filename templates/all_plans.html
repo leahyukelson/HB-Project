@@ -1,15 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
 
-    <h2>Plans</h2>
-    <ul>
-      {% for plan in plans %}
-          <li>
-              <a href="/plans/{{ plan.plan_id }}">
-                {{ plan.plan_name }}
-              </a>
-          </li>
-      {% endfor %}
-    </ul>
+{% if plans %}
+<h2>Plans</h2>
+  {% for plan in plans %}
+      <h3>{{ plan.plan_name }}</h3>
+      <h4>Event: {{plan.event_name}}</h4>
+        {% if plan.event_location %}
+        <p>{{plan.event_location}}</p>
+        {% endif %}
+        <p>{{plan.event_address}}</p>
+        <p>{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
+      {% if plan.food_name %}
+      <h4>Restaurant: {{plan.food_name}}</h4>
+        <p>{{plan.food_address}}</p>
+        <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}  
+      {% endif %}
+  {% endfor %}
+{% else %}
+<a href="/new-plan">You have no plans yet. Create one now!</a>
+{% endif %}
+
 
 {% endblock %}

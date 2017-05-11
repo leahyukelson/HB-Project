@@ -167,23 +167,20 @@ def add_new_plan():
     current_plan_id = new_plan.plan_id
     db.session.commit()
 
-    # Use a cookie to track which plan is being currently edited and created
-    session['current_plan'] = current_plan_id
-
     # Add association between User and Plan in UserPlan database
     new_userplan = UserPlan(user_id=current_user_id, plan_id=current_plan_id)
     db.session.add(new_userplan)
     db.session.commit()
 
     # Change this to add restaurant when this is good
-    return redirect('/choose-restaurant')
+    return redirect('/choose-restaurant/'+str(current_plan_id))
 
-@app.route('/choose-restaurant')
-def choose_restaurant():
+@app.route('/choose-restaurant/<plan_id>')
+def choose_restaurant(plan_id):
     """ Allows a user to choose a restaurant to add to plan """
     # Will default to two hours before event and one mile radius around location
     # Future iteration - ask user how far willing to go and how much earlier they would like to meet
-    current_plan = Plan.query.get(session['current_plan'])
+    current_plan = Plan.query.get(plan_id)
     location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
     open_at_hour = current_plan.event_time.hour - 2
 
@@ -217,21 +214,48 @@ def choose_restaurant():
     print bars
     print restaurants
 
-    return render_template("choose_business.html", restaurants=restaurants, bars=bars)
+    return render_template("choose_business.html", restaurants=restaurants, bars=bars, current_plan_id=plan_id)
 
-@app.route('/choose-restaurant', methods=['POST'])
-def add_plan_restaurant():
-    pass
+@app.route('/choose-restaurant/<plan_id>', methods=['POST'])
+def add_plan_restaurant(plan_id):
+    """ Adds restaurant or bar to user's current plan """
+    headers = {
+        'Authorization': 'Bearer %s' % app.yelp_bearer_token,
+    }
 
-# @app.route('/plans')
-# def user_plan():
-#     """ Dashboard for all user's plans """
+    chosen_id = request.form.get('event_food')
 
-#     # This needs de-bugging and fixing oops
-#     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
-#     plans = db.session.query(UserPlan.plan).filter(UserPlan.user_id==current_user_id).join(User).join(Plan)
-#     return render_template('all_plans.html')
+    chosen = requests.request('GET', 'https://api.yelp.com/v3/businesses/'+chosen_id, headers=headers)
+    food_chosen = chosen.json()
 
+    print food_chosen
+    # Get current plan and update with yelp listing details
+    current_plan = Plan.query.get(plan_id)
+
+    current_plan.food_time = current_plan.event_time - datetime.timedelta(hours=2)
+    current_plan.food_name = food_chosen['name']
+    current_plan.food_address = food_chosen['location']['address1']
+    current_plan.food_city = food_chosen['location']['city']
+    current_plan.food_state = food_chosen['location']['state']
+    current_plan.food_zipcode = food_chosen['location']['zip_code']
+    current_plan.food_longitude = food_chosen['coordinates']['longitude']
+    current_plan.food_latitude = food_chosen['coordinates']['latitude']
+
+    db.session.commit()
+
+    return redirect('/')
+
+
+@app.route('/profile')
+def user_profile():
+    """ Dashboard for all user's plans """
+
+    # This needs de-bugging and fixing oops
+    current_user = User.query.filter_by(email=session['current_user']).first()
+    plans = current_user.plans
+    print plans
+
+    return render_template('all_plans.html', plans=plans)
 
 
 if __name__ == "__main__":
@@ -242,8 +266,6 @@ if __name__ == "__main__":
 
     connect_to_db(app)
     app.yelp_bearer_token = get_yelp_bearer_token()
-
-    # example_plan()
 
     # Use the DebugToolbar
     # DebugToolbarExtension(app)

@@ -24,6 +24,11 @@ class User(db.Model):
     password = db.Column(db.String(64), nullable=False)
     zipcode = db.Column(db.String(15), nullable=True)
 
+    # Define relationship to plan
+    plans = db.relationship("Plan",
+                            secondary = "userplans",
+                           backref="users")
+
     def __repr__(self):
         """Provide helpful representation when printed."""
         return "<User user_id=%s email=%s>" % (self.user_id, self.email)
@@ -50,6 +55,7 @@ class Plan(db.Model):
     food_address = db.Column(db.String(100))
     food_city = db.Column(db.String(50))
     food_state = db.Column(db.String(50))
+    food_zipcode = db.Column(db.String(15))
     food_latitude = db.Column(db.Float)
     food_longitude = db.Column(db.Float)
 
@@ -97,15 +103,6 @@ class UserPlan(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     plan_id = db.Column(db.Integer, db.ForeignKey('plans.plan_id'))
 
-    # Define relationship to plan
-    plan = db.relationship("Plan",
-                           backref=db.backref("userplans",
-                                              order_by=user_plan_id))
-
-    # Define relationship to invitee's friend
-    user = db.relationship("User",
-                           backref=db.backref("userplans",
-                                              order_by=user_plan_id))
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -125,6 +122,7 @@ def connect_to_db(app):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)
+    db.create_all()
 
 
 if __name__ == "__main__":

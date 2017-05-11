@@ -3,14 +3,14 @@
 
 {% if 'current_user' in session %}
     <h2>Choose a bar or restaurant! </h2>
-    <form id="add_restaurant_plan" action="/choose-restaurant" method="POST"> 
+    <form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST"> 
       <h4> Bars - </h4>
       {% for bar in bars['businesses'] %}
-      <input type="radio" name='event_food' value={{bar['name']}}>{{bar['name']}}<br>
+      <input type="radio" name='event_food' value={{bar['id']}}>{{bar['name']}}<br>
       {% endfor %}
       <h4> Restaurants - </h4>
       {% for rest in restaurants['businesses'] %}
-      <input type="radio" name='event_food' value={{rest['name']}}>{{rest['name']}}<br>
+      <input type="radio" name='event_food' value={{rest['id']}}>{{rest['name']}}<br>
       {% endfor %}
       <input type="submit" id="submit_button">
     </form>
