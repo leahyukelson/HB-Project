@@ -71,7 +71,7 @@ def create_new_user():
     user_zip = request.form.get('zip_code')
 
     # Encode password
-    # hashed = bcrypt.hashpw(user_password, bcrypt.gensalt(9))
+    hashed = bcrypt.hashpw(user_password.encode('utf8'), bcrypt.gensalt(9))
 
     user = User.query.filter_by(email=user_email).all()
 
@@ -81,7 +81,7 @@ def create_new_user():
         return redirect('/login-form')
     # Create new user and log in
     else:
-        new_user = User(email=user_email, password=user_password, 
+        new_user = User(email=user_email, password=hashed, 
                         first_name=user_first_name, last_name=user_last_name, 
                         zipcode=user_zip)
         db.session.add(new_user)
@@ -112,12 +112,10 @@ def check_login():
     user_email = request.form.get('email')
     user_password = request.form.get('password')
 
-    # hashed = bcrypt.hashpw(user_password, bcrypt.gensalt(9))
-
     # Look for user in database and match password
     try:
         user = User.query.filter_by(email=user_email).one()
-        if user.password == user_password:
+        if bcrypt.checkpw(user_password.encode('utf8'), user.password.encode('utf8')):
             session['current_user'] = user_email
             flash('You are now logged in!')
             return redirect('/profile')
