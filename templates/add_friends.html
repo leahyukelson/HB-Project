@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if 'current_user' in session %}
+    <h2>Add up to 12 friends to your plan</h2>
+    <form id="add_friends_plan" action="/add-friends/{{plan_id }}" method="POST">
+    {% for friend in range(12) %}
+    <p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</p> 
+      First Name:<input type="text" name={{ "fname"+friend|string }}>
+      Last Name:<input type="text" name={{ "lname"+friend|string }}><br>
+      E-mail:<input type="email" name={{ "email"+friend|string }}>
+      Phone Number:<input type="tel" name={{ "phone"+friend|string }}><br>
+    {% endfor %}
+      <input type="submit" id="submit_button">
+    </form>
+
+    <a href="/profile">Add friends later</a>
+
+{% else %}
+    <li><a href="/login-form">Log In</a></li>
+    <li><a href="/create-account">Create Account</a></li>
+{% endif %}
+
+{% endblock %}

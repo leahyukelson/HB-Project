@@ -3,6 +3,7 @@
 
 {% if plans %}
 <h2>Plans</h2>
+<a href="/new-plan">Create New</a>
   {% for plan in plans %}
       <h3>{{ plan.plan_name }}</h3>
       <h4>Event: {{plan.event_name}}</h4>
@@ -15,6 +16,12 @@
       <h4>Restaurant: {{plan.food_name}}</h4>
         <p>{{plan.food_address}}</p>
         <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}  
+      {% endif %}
+      {% if plan.invitees %}
+      <h4>Friends Invited:</h4>
+      {% for invitees in plan.invitees %}
+        <p>{{invitees.first_name}} {{invitees.last_name}}</p>
+      {% endfor %}
       {% endif %}
   {% endfor %}
 {% else %}

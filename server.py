@@ -9,6 +9,7 @@ import datetime
 import requests
 from urllib import urlencode, quote
 import os
+import bcrypt
 
 
 app = Flask(__name__)
@@ -69,6 +70,8 @@ def create_new_user():
     user_last_name = request.form.get('last_name')
     user_zip = request.form.get('zip_code')
 
+    # Encode password
+    # hashed = bcrypt.hashpw(user_password, bcrypt.gensalt(9))
 
     user = User.query.filter_by(email=user_email).all()
 
@@ -86,9 +89,7 @@ def create_new_user():
         session['current_user'] = user_email
         flash('You are now registered and logged in!')
 
-
-    # Add previously invited plans
-        return redirect('/')
+        return redirect('/profile')
 
 @app.route('/logout')
 def logout():
@@ -111,13 +112,15 @@ def check_login():
     user_email = request.form.get('email')
     user_password = request.form.get('password')
 
+    # hashed = bcrypt.hashpw(user_password, bcrypt.gensalt(9))
+
     # Look for user in database and match password
     try:
         user = User.query.filter_by(email=user_email).one()
         if user.password == user_password:
             session['current_user'] = user_email
             flash('You are now logged in!')
-            return redirect('/new-plan')
+            return redirect('/profile')
         else:
             flash('Wrong password!')
             return redirect('/login-form')
@@ -243,17 +246,40 @@ def add_plan_restaurant(plan_id):
 
     db.session.commit()
 
-    return redirect('/')
+    return redirect('/add-friends/'+str(plan_id))
 
+
+@app.route('/add-friends/<plan_id>')
+def add_friends(plan_id):
+    """ Add users friends to plan """
+    return render_template("add_friends.html", plan_id=plan_id)
+
+@app.route('/add-friends/<plan_id>', methods=['POST'])
+def add_invitees(plan_id):
+    """ Add users friends to plan """
+    current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
+
+    for friend in range(12):
+        if request.form.get('fname'+str(friend)):
+            fname = request.form.get('fname'+str(friend))
+            lname = request.form.get('lname'+str(friend))
+            email = request.form.get('email'+str(friend))
+            phone = request.form.get('phone'+str(friend))
+            new_invitee = Invitee(plan_id=plan_id, user_id=current_user_id, 
+                                first_name=fname, last_name=lname, email=email,
+                                phone=phone)
+            db.session.add(new_invitee)
+            db.session.commit()
+
+    return redirect ('/profile')
 
 @app.route('/profile')
 def user_profile():
     """ Dashboard for all user's plans """
 
-    # This needs de-bugging and fixing oops
+    # Query database for all plans for a logged-in user
     current_user = User.query.filter_by(email=session['current_user']).first()
     plans = current_user.plans
-    print plans
 
     return render_template('all_plans.html', plans=plans)
 
