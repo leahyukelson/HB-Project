@@ -144,11 +144,13 @@ def add_new_plan():
     new_plan_time = request.form.get('event_time')
     new_event_datetime = datetime.datetime.strptime(new_plan_date + " " + new_plan_time, "%Y-%m-%d %H:%M")
     new_plan_location = request.form.get('location')
-    new_plan_address = request.form.get('address')
+    new_plan_number = request.form.get('number')
+    new_plan_street = request.form.get('street')
     new_plan_state = request.form.get('state')
     new_plan_city = request.form.get('city')
     new_plan_zipcode = request.form.get('zipcode')
 
+    new_plan_address = new_plan_number + " " + new_plan_street
     # If user chooses to not name plan right away - defaults to the event name
     if new_plan_name == "":
         new_plan_name = new_event_name
@@ -289,7 +291,9 @@ if __name__ == "__main__":
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)
-    app.yelp_bearer_token = get_yelp_bearer_token()
+
+    app.yelp_bearer_token = 'WllJxLDGOspRQnGbwsoqd9CFqeW8_LshxaRo1WZXWbTJ5-zCePPbNwW61x1NCJiX9-RIh7KMiP-3l7RxJtrqnczHAILypbXeduWluvi3zK0OTUorLHk_9E3TbIMTWXYx'
+
 
     # Use the DebugToolbar
     # DebugToolbarExtension(app)
