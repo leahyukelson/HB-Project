@@ -84,8 +84,28 @@ def create_new_user():
         new_user = User(email=user_email, password=hashed, 
                         first_name=user_first_name, last_name=user_last_name, 
                         zipcode=user_zip)
+
+        # Add new user to the databased
         db.session.add(new_user)
+
+        print "GOT HERE"
+        # Flush db to get new_user user_id
+        db.session.flush()
+
+        # Check if user has had previous invites and add them to userplans
+        previously_invited = Invitee.query.filter_by(email=user_email).all()
+        print "PREVIOUSLY INVITED", previously_invited
+
         db.session.commit()
+        # Loop through all previous invites and add user plans to associate to user
+        if previously_invited:
+            for previous_plan in previously_invited:
+                print "PREVIOUS PLAN", previous_plan
+                new_user_plan = UserPlan(plan_id=previous_plan.plan_id, user_id=new_user.user_id)
+                db.session.add(new_user_plan)
+                db.session.commit()
+
+
         session['current_user'] = user_email
         flash('You are now registered and logged in!')
 
@@ -131,7 +151,10 @@ def check_login():
 @app.route('/new-plan')
 def new_plan():
     """ User creates a new plan """
-    return render_template('add_plan.html')
+    if not session['current_user']:
+        return redirect('/login-form')
+    else:
+        return render_template('add_plan.html')
 
 @app.route('/new-plan', methods=['POST'])
 def add_new_plan():
@@ -175,7 +198,7 @@ def add_new_plan():
     db.session.add(new_userplan)
     db.session.commit()
 
-    # Change this to add restaurant when this is good
+    # Choose a restaurant
     return redirect('/choose-restaurant/'+str(current_plan_id))
 
 @app.route('/choose-restaurant/<plan_id>')
@@ -185,7 +208,6 @@ def choose_restaurant(plan_id):
     # Future iteration - ask user how far willing to go and how much earlier they would like to meet
     current_plan = Plan.query.get(plan_id)
     location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
-    open_at_hour = current_plan.event_time.hour - 2
 
     headers = {
         'Authorization': 'Bearer %s' % app.yelp_bearer_token,
@@ -200,7 +222,6 @@ def choose_restaurant(plan_id):
 
 
     b = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=bar_url_params)
-    print b
     bars = b.json()
 
     rest_url_params = {
@@ -211,11 +232,7 @@ def choose_restaurant(plan_id):
     }
 
     r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
-    print r
     restaurants = r.json()
-
-    print bars
-    print restaurants
 
     return render_template("choose_business.html", restaurants=restaurants, bars=bars, current_plan_id=plan_id)
 
@@ -269,6 +286,14 @@ def add_invitees(plan_id):
                                 first_name=fname, last_name=lname, email=email,
                                 phone=phone)
             db.session.add(new_invitee)
+
+            # Check if invitee has an account and add plan to their userplan
+            invitee_user = User.query.filter_by(email=email).first()
+            print "INVITEE", invitee_user
+            if invitee_user:
+                new_user_plan = UserPlan(plan_id=plan_id, user_id=invitee_user.user_id)
+                db.session.add(new_user_plan)
+            
             db.session.commit()
 
     return redirect ('/profile')

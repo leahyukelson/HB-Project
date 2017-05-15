@@ -6,11 +6,15 @@
     <form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST"> 
       <h4> Bars - </h4>
       {% for bar in bars['businesses'] %}
-      <input type="radio" name='event_food' value={{bar['id']}}>{{bar['name']}}<br>
+      <input type="radio" class='business_name' name='event_food' value={{bar['id']}}><a href={{bar['url']}}>{{bar['name']}}</a><br>
+      <div class='business_info'>Yelp Rating: {{bar['rating']}}<br> 
+                                Distance from Event: {{'%0.2f' % (bar['distance']|float/1609.03)}} mi.</div>
       {% endfor %}
       <h4> Restaurants - </h4>
       {% for rest in restaurants['businesses'] %}
-      <input type="radio" name='event_food' value={{rest['id']}}>{{rest['name']}}<br>
+      <input type="radio" class='business_name' name='event_food' value={{rest['id']}}><a href={{rest['url']}}>{{rest['name']}}</a><br>
+      <div class='business_info'>Yelp Rating: {{rest['rating']}}<br> 
+                          Distance from Event: {{'%0.2f' % (rest['distance']|float/1609.03)}} mi.</div>
       {% endfor %}
       <input type="submit" id="submit_button">
     </form>
@@ -21,3 +25,8 @@
 {% endif %}
 
 {% endblock %}
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script>
+
+</script>

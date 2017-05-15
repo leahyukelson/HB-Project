@@ -74,8 +74,8 @@ class Invitee(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
-    phone = db.column(db.Integer)
-    email = db.column(db.String(64))
+    phone = db.Column(db.String(15))
+    email = db.Column(db.String(64))
 
     # Define relationship to plan
     plan = db.relationship("Plan",
@@ -114,6 +114,10 @@ class UserPlan(db.Model):
 ##############################################################################
 # Helper functions
 
+def fill_example_data():
+    """ Fill database with sample data to start with """
+    pass
+
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
@@ -122,7 +126,6 @@ def connect_to_db(app):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)
-    db.create_all()
 
 
 if __name__ == "__main__":
@@ -132,3 +135,4 @@ if __name__ == "__main__":
     from server import app
     connect_to_db(app)
     print "Connected to DB."
+    db.create_all()
