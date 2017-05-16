@@ -20,7 +20,9 @@
       {% if plan.invitees %}
       <h4>Friends Invited:</h4>
       {% for invitees in plan.invitees %}
+        {% if not invitees.email == session['current_user']  %}
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
+        {% endif %}
       {% endfor %}
       {% endif %}
   {% endfor %}

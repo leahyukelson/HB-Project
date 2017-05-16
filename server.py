@@ -10,6 +10,7 @@ import requests
 from urllib import urlencode, quote
 import os
 import bcrypt
+import json
 
 
 app = Flask(__name__)
@@ -204,8 +205,10 @@ def add_new_plan():
 @app.route('/choose-restaurant/<plan_id>')
 def choose_restaurant(plan_id):
     """ Allows a user to choose a restaurant to add to plan """
+
     # Will default to two hours before event and one mile radius around location
     # Future iteration - ask user how far willing to go and how much earlier they would like to meet
+
     current_plan = Plan.query.get(plan_id)
     location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
 
@@ -243,12 +246,12 @@ def add_plan_restaurant(plan_id):
         'Authorization': 'Bearer %s' % app.yelp_bearer_token,
     }
 
-    chosen_id = request.form.get('event_food')
-
-    chosen = requests.request('GET', 'https://api.yelp.com/v3/businesses/'+chosen_id, headers=headers)
-    food_chosen = chosen.json()
-
+    food_chosen = json.dumps(request.form.get('event_food'))
     print food_chosen
+
+    # chosen = requests.request('GET', 'https://api.yelp.com/v3/businesses/'+chosen_id, headers=headers)
+    # food_chosen = chosen.json()
+
     # Get current plan and update with yelp listing details
     current_plan = Plan.query.get(plan_id)
 
