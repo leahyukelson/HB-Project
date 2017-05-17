@@ -303,6 +303,8 @@ def choose_restaurant(plan_id):
 
     current_plan = Plan.query.get(plan_id)
     location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
+    food_time = current_plan.event_time - datetime.timedelta(hours=2)
+    unix_time = int((food_time - datetime.datetime(1970, 1, 1)).total_seconds())
 
     headers = {
         'Authorization': 'Bearer %s' % app.yelp_bearer_token,
@@ -318,6 +320,8 @@ def choose_restaurant(plan_id):
 
     b = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=bar_url_params)
     bars = b.json()
+
+    print bars
 
     rest_url_params = {
         'term': 'restaurants',
