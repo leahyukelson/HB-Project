@@ -149,6 +149,19 @@ def check_login():
         flash("No user with that email")
         return redirect('/create-account')
 
+
+@app.route('/profile')
+def user_profile():
+    """ Dashboard for all user's plans """
+
+    # Query database for all plans for a logged-in user
+    current_user = User.query.filter_by(email=session['current_user']).first()
+    plans = current_user.plans
+    current_user_id = current_user.user_id
+
+    return render_template('all_plans.html', plans=plans, current_user=current_user_id)
+
+
 @app.route('/new-plan')
 def new_plan():
     """ User creates a new plan """
@@ -202,6 +215,85 @@ def add_new_plan():
     # Choose a restaurant
     return redirect('/choose-restaurant/'+str(current_plan_id))
 
+@app.route('/edit-plan/<plan_id>')
+def edit_plan(plan_id):
+    """ User edits an existing plan they own """
+    
+    # Pull current user from session and plan id from route
+    current_user = User.query.filter_by(email=session['current_user']).first().user_id
+    plan = Plan.query.get(plan_id)
+
+    # Check plan_id exists and that current user is the creator
+    if not plan:
+        flash("Plan does not exist")
+        return redirect('/profile')
+
+    elif current_user != plan.plan_user_creator:
+        flash("Only plan creator may edit plan")
+        return redirect('/profile')   
+
+    else:
+
+        # Separate date and time from datetime object in database
+        plan_datetime = plan.event_time
+        plan_date = plan_datetime.date()
+        plan_date = plan_date.strftime("%Y-%m-%d")
+        plan_time = plan_datetime.time()
+        plan_time = plan_time.strftime("%H:%M")
+
+        return render_template('edit_plan.html', plan=plan, plan_date=plan_date, plan_time=plan_time)
+
+
+@app.route('/edit-plan/<plan_id>', methods=['POST'])
+def edit_event_plan(plan_id):
+    """ Adds event to user's new plan """
+    plan = Plan.query.get(plan_id)
+
+    # Extract data from plan form
+    new_plan_name = request.form.get('plan_name')
+    new_event_name = request.form.get('event_name')
+    new_plan_date = request.form.get('event_date')
+    new_plan_time = request.form.get('event_time')
+    new_event_datetime = datetime.datetime.strptime(new_plan_date + " " + new_plan_time, "%Y-%m-%d %H:%M")
+    new_plan_location = request.form.get('location')
+    new_plan_number = request.form.get('number')
+    new_plan_street = request.form.get('street')
+    new_plan_state = request.form.get('state')
+    new_plan_city = request.form.get('city')
+    new_plan_zipcode = request.form.get('zipcode')
+
+    # Mark if event's location has changed to allow user to choose a different restaurant
+    if new_plan_location != plan.event_location:
+        different_location = True
+    else:
+        different_location = False
+
+    new_plan_address = new_plan_number + " " + new_plan_street
+
+    # If user chooses to not name plan right away - defaults to the event name
+    if new_plan_name == "":
+        new_plan_name = new_event_name
+
+    current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
+
+    # Edit plan object with plan attributes
+    plan.plan_name = new_plan_name
+    plan.event_name = new_event_name
+    plan.event_time = new_event_datetime
+    plan.event_location = new_plan_location
+    plan.event_address = new_plan_address
+    plan.event_state = new_plan_state
+    plan.event_city = new_plan_city
+    plan.event_zipcode = new_plan_zipcode
+
+    db.session.commit()
+
+    if different_location == False:
+        return redirect('/profile')
+    else:
+        return redirect('/choose-restaurant/'+str(plan.plan_id))
+
+
 @app.route('/choose-restaurant/<plan_id>')
 def choose_restaurant(plan_id):
     """ Allows a user to choose a restaurant to add to plan """
@@ -246,11 +338,12 @@ def add_plan_restaurant(plan_id):
         'Authorization': 'Bearer %s' % app.yelp_bearer_token,
     }
 
-    food_chosen = json.dumps(request.form.get('event_food'))
-    print food_chosen
+    chosen_id = request.form.get('event_food')
+    print chosen_id
 
-    # chosen = requests.request('GET', 'https://api.yelp.com/v3/businesses/'+chosen_id, headers=headers)
-    # food_chosen = chosen.json()
+    chosen = requests.request('GET', 'https://api.yelp.com/v3/businesses/'+chosen_id, headers=headers)
+    food_chosen = chosen.json()
+    print food_chosen
 
     # Get current plan and update with yelp listing details
     current_plan = Plan.query.get(plan_id)
@@ -272,7 +365,22 @@ def add_plan_restaurant(plan_id):
 @app.route('/add-friends/<plan_id>')
 def add_friends(plan_id):
     """ Add users friends to plan """
-    return render_template("add_friends.html", plan_id=plan_id)
+    plan = Plan.query.get(plan_id)
+
+    # If user got re-directed here through editing restaurant, take back to profile
+    if plan.invitees:
+        return redirect('/profile')
+
+    else:
+        return render_template("add_friends.html", plan=plan)
+
+
+@app.route('/add-more-friends/<plan_id>')
+def add_more_friends(plan_id):
+    """ Add users friends to plan """
+    plan = Plan.query.get(plan_id)
+
+    return render_template("add_friends.html", plan=plan)
 
 @app.route('/add-friends/<plan_id>', methods=['POST'])
 def add_invitees(plan_id):
@@ -300,16 +408,6 @@ def add_invitees(plan_id):
             db.session.commit()
 
     return redirect ('/profile')
-
-@app.route('/profile')
-def user_profile():
-    """ Dashboard for all user's plans """
-
-    # Query database for all plans for a logged-in user
-    current_user = User.query.filter_by(email=session['current_user']).first()
-    plans = current_user.plans
-
-    return render_template('all_plans.html', plans=plans)
 
 
 if __name__ == "__main__":

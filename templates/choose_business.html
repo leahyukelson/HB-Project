@@ -12,7 +12,7 @@
       {% endfor %}
       <h4> Restaurants - </h4>
       {% for rest in restaurants['businesses'] %}
-      <input type="radio" class='business_name' name='event_food' value={{rest['id']}}><a href={{rest['url']}}>{{rest['name']}}</a><br>
+      <input type="radio" class='business_name' name='event_food' value{{rest['id']}}><a href={{rest['url']}}>{{rest['name']}}</a><br>
       <div class='business_info'>Yelp Rating: {{rest['rating']}}<br> 
                           Distance from Event: {{'%0.2f' % (rest['distance']|float/1609.03)}} mi.</div>
       {% endfor %}
