@@ -329,7 +329,7 @@ def choose_restaurant(plan_id):
     r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
     restaurants = r.json()
 
-    return render_template("choose_business.html", restaurants=restaurants, bars=bars, current_plan_id=plan_id)
+    return render_template("choose_business.html", restaurants=restaurants['businesses'], bars=bars['businesses'], current_plan_id=plan_id)
 
 @app.route('/choose-restaurant/<plan_id>', methods=['POST'])
 def add_plan_restaurant(plan_id):
@@ -339,11 +339,7 @@ def add_plan_restaurant(plan_id):
     }
 
     chosen_id = request.form.get('event_food')
-    print chosen_id
-
-    chosen = requests.request('GET', 'https://api.yelp.com/v3/businesses/'+chosen_id, headers=headers)
-    food_chosen = chosen.json()
-    print food_chosen
+    food_chosen = json.loads(chosen_id)
 
     # Get current plan and update with yelp listing details
     current_plan = Plan.query.get(plan_id)
