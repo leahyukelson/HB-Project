@@ -31,7 +31,7 @@
 </form>
 
 <div id="restaurant_options" hidden>
-<h4>Restaurants</h4>
+<h4>Choose one:</h4>
 <form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST">
   <div id="business_buttons"></div>
       <input type="submit" id="submit_button">
@@ -47,12 +47,10 @@
 <script src="https://code.jquery.com/jquery.js"></script>
 <script>
 "use strict";
-console.log("Readying JS")
 
 function show_businesses(yelp_json){
 // Fill in form from Yelp API json
   $('#restaurant_options').show();
-  $('#restaurant_options h4').html($('#bar_or_rest').val())
 
     var business;
     var bus_url;
@@ -64,13 +62,12 @@ function show_businesses(yelp_json){
     // Radio buttons for business options
 
     business = yelp_json[bus];
-    console.log(business)
     bus_url = business['url'];
     bus_name = business['name'];
     bus_rating = business['rating'];
     bus_distance = Number(business['distance']/1609.03).toFixed(2); 
 
-    $('#business_buttons').append("<input type=\"radio\" name=\"event_food\" value="+business+"><a href="+bus_url+">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. <br>")
+    $('#business_buttons').append("<input type=\"radio\" name=\"event_food\" value=\'"+JSON.stringify(business)+"\''><a href="+bus_url+">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. <br>")
   }
 }
 

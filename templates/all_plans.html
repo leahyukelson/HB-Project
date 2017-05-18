@@ -12,7 +12,7 @@
         {% endif %}
         <p>{{plan.event_address}}</p>
         <p>{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
-      {% if plan.food_name %}
+      {% if (plan.food_name) and (plan.food_time) %}
       <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
         <p>{{plan.food_address}}</p>
         <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>  

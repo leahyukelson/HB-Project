@@ -305,10 +305,13 @@ def choose_restaurant():
 
 
     current_plan = Plan.query.get(plan_id)
+    print current_plan
+
     location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
     food_time = current_plan.event_time - datetime.timedelta(hours=time_before)
 
     current_plan.food_time = food_time
+    db.session.commit()
 
     radius = int(distance * 1600)
     unix_time = int((food_time - datetime.datetime(1970, 1, 1)).total_seconds())
@@ -327,8 +330,6 @@ def choose_restaurant():
     r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
     response = r.json()
 
-    print response
-
     return jsonify(response['businesses'])
 
 
@@ -346,12 +347,13 @@ def add_plan_restaurant(plan_id):
     }
 
     chosen_id = request.form.get('event_food')
-    
+    print "CHOSEN ID", chosen_id
+    print "TYPE", type(chosen_id)
+
     # BUG HERE: Not finding JSON to load!
     food_chosen = json.loads(chosen_id)
 
-    print "chosen_id", chosen_id
-    print type(chosen_id)
+    print "FOOD CHOSEN", food_chosen
 
     # Get current plan and update with yelp listing details
     current_plan = Plan.query.get(plan_id)
