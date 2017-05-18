@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if 'current_user' in session %}
+
+<form id="customize_restaurant_form" action="dont_go_here">
+  Meet at:<select id="bar_or_rest" name="bar_or_restaurant">
+            <option value="bars">Bar</option>
+            <option value="restaurants">Restaurant</option>
+          </select><br>
+          <select id="time_before" name="time_before">
+            <option value="0.5">30 minutes</option>
+            <option value="1">1 hour</option>
+            <option value="1.5">1.5 hours</option>
+            <option value="2">2 hours</option>
+            <option value="2.5">2.5 hours</option>
+            <option value="3">3 hours</option>
+            <option value="3.5">3.5 hours</option>
+            <option value="4">4 hours</option>
+            <option value="4.5">4.5 hours</option>
+            <option value="5">5 hours</option>
+          </select> Before event<br>
+     Up to<select id="distance" name="distance">
+            <option value="0.5">1/2 mile</option>
+            <option value="1">1 mile</option>
+            <option value="5">5 miles</option>
+            <option value="10">10 miles</option>
+          </select> away <br>
+<input type="hidden" value='{{current_plan_id}}' id="plan_id">
+<input type="submit" id="submit_button">
+</form>
+
+<div id="restaurant_options" hidden>
+<h4>Restaurants</h4>
+<form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST">
+  <div id="business_buttons"></div>
+      <input type="submit" id="submit_button">
+</form>
+</div>
+
+
+{% else %}
+    <li><a href="/login-form">Log In</a></li>
+    <li><a href="/create-account">Create Account</a></li>
+{% endif %}
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script>
+"use strict";
+console.log("Readying JS")
+
+function show_businesses(yelp_json){
+// Fill in form from Yelp API json
+  $('#restaurant_options').show();
+  $('#restaurant_options h4').html($('#bar_or_rest').val())
+
+    var business;
+    var bus_url;
+    var bus_name;
+    var bus_rating;
+    var bus_distance
+
+  for (var bus=0; bus < yelp_json.length; bus ++){
+    // Radio buttons for business options
+
+    business = yelp_json[bus];
+    console.log(business)
+    bus_url = business['url'];
+    bus_name = business['name'];
+    bus_rating = business['rating'];
+    bus_distance = Number(business['distance']/1609.03).toFixed(2); 
+
+    $('#business_buttons').append("<input type=\"radio\" name=\"event_food\" value="+business+"><a href="+bus_url+">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. <br>")
+  }
+}
+
+function business_options(evt){
+  evt.preventDefault();
+
+  $('#customize_restaurant_form').hide();
+
+  var user_prefs = {
+    'plan_id' : $('#plan_id').val(),
+    'bar_or_rest' : $('#bar_or_rest').val(),
+    'time_before' : $('#time_before').val(),
+    'distance' : $('#distance').val()
+  };
+
+  $.post('/yelp.json', user_prefs, show_businesses);
+}
+
+$('#customize_restaurant_form').on('submit', business_options);
+
+</script>
+
+
+{% endblock %}

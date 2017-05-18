@@ -3,7 +3,7 @@
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
 from flask import (Flask, render_template, redirect, request, flash,
-                   session)
+                   session, jsonify)
 from model import *
 import datetime
 import requests
@@ -294,46 +294,49 @@ def edit_event_plan(plan_id):
         return redirect('/choose-restaurant/'+str(plan.plan_id))
 
 
-@app.route('/choose-restaurant/<plan_id>')
-def choose_restaurant(plan_id):
+@app.route('/yelp.json', methods=["POST"])
+def choose_restaurant():
     """ Allows a user to choose a restaurant to add to plan """
 
-    # Will default to two hours before event and one mile radius around location
-    # Future iteration - ask user how far willing to go and how much earlier they would like to meet
+    plan_id = int(request.form.get("plan_id"))
+    business = str(request.form.get("bar_or_rest"))
+    time_before = float(request.form.get("time_before"))
+    distance = float(request.form.get("distance"))
+
 
     current_plan = Plan.query.get(plan_id)
     location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
-    food_time = current_plan.event_time - datetime.timedelta(hours=2)
+    food_time = current_plan.event_time - datetime.timedelta(hours=time_before)
+
+    current_plan.food_time = food_time
+
+    radius = int(distance * 1600)
     unix_time = int((food_time - datetime.datetime(1970, 1, 1)).total_seconds())
 
     headers = {
         'Authorization': 'Bearer %s' % app.yelp_bearer_token,
     }
 
-    bar_url_params = {
-        'term': 'bars',
-        'location': location.replace(' ', '+'),
-        'limit': 10,
-        'radius': 1600,
-    }
-
-
-    b = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=bar_url_params)
-    bars = b.json()
-
-    print bars
-
     rest_url_params = {
-        'term': 'restaurants',
+        'term': business,
         'location': location.replace(' ', '+'),
-        'limit': 10,
-        'radius': 1600,
+        'limit': 20,
+        'radius': radius,
     }
 
     r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
-    restaurants = r.json()
+    response = r.json()
 
-    return render_template("choose_business.html", restaurants=restaurants['businesses'], bars=bars['businesses'], current_plan_id=plan_id)
+    print response
+
+    return jsonify(response['businesses'])
+
+
+@app.route('/choose-restaurant/<plan_id>')
+def customize_restaurant(plan_id):
+    """ Allows a user to customize distance from location, time meeting and whether a restaurant or bar """
+    return render_template("customize_business.html", current_plan_id=plan_id)
+
 
 @app.route('/choose-restaurant/<plan_id>', methods=['POST'])
 def add_plan_restaurant(plan_id):
@@ -343,12 +346,16 @@ def add_plan_restaurant(plan_id):
     }
 
     chosen_id = request.form.get('event_food')
+    
+    # BUG HERE: Not finding JSON to load!
     food_chosen = json.loads(chosen_id)
+
+    print "chosen_id", chosen_id
+    print type(chosen_id)
 
     # Get current plan and update with yelp listing details
     current_plan = Plan.query.get(plan_id)
 
-    current_plan.food_time = current_plan.event_time - datetime.timedelta(hours=2)
     current_plan.food_name = food_chosen['name']
     current_plan.food_address = food_chosen['location']['address1']
     current_plan.food_city = food_chosen['location']['city']
@@ -423,5 +430,4 @@ if __name__ == "__main__":
 
     # Use the DebugToolbar
     # DebugToolbarExtension(app)
-
     app.run(port=5000, host='0.0.0.0')
