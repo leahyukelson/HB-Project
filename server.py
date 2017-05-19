@@ -11,6 +11,8 @@ from urllib import urlencode, quote
 import os
 import bcrypt
 import json
+import sendgrid
+from sendgrid.helpers.mail import *
 
 
 app = Flask(__name__)
@@ -24,10 +26,8 @@ app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
 
-
-# Yelp Stuff
 def get_yelp_bearer_token():
-    """ Cache yelp token id """
+    """ Get and cache yelp token id """
 
     # OS environ for client ID would not be accepted on Yelp side
     data = urlencode({
@@ -41,9 +41,48 @@ def get_yelp_bearer_token():
     path = '/oauth2/token'
     url = '{0}{1}'.format(host, quote(path.encode('utf8')))
     response = requests.request("POST", url, data=data, headers=headers)
-    print response.json()
     bearer_token = response.json()['access_token']
     return bearer_token
+
+
+def send_email(plan_id, invitee_email, invitee_first_name, invitee_last_name):
+    """ Send email to invited guests """
+    sg = sendgrid.SendGridAPIClient(apikey=os.environ['SENDGRID_API_KEY'])
+
+    plan = Plan.query.get(plan_id)
+    
+
+    # Set up email settings
+    from_email = Email("donotreply@nightout.com", "Night Out Concierge")
+    subject = "Plan for " + plan.event_name + " on " + plan.event_time.strftime('%x')
+    to_email = Email(invitee_email, invitee_first_name + " " + invitee_last_name)
+
+    # HTML to represent body of email
+    html_header="<h3>"+plan.event_time.strftime('%x') + " " + plan.plan_name+ "</h3><h4>" + plan.event_time.strftime('%-I:%M %p')+ ": " + plan.event_name + "</h4>"
+    
+    html_evlocation = ""
+    if plan.event_location:
+        html_evlocation = "<p>"+ plan.event_location + "</p>"
+    html_evaddress = "<p>" + plan.event_address + "</p><p>" + plan.event_city+ ", " + plan.event_state+ " " + plan.event_zipcode
+
+    html_food = ""
+    if (plan.food_name) and (plan.food_time):
+        html_food = "<h4>" + plan.food_time.strftime('%-I:%M %p')+": "+plan.food_name+"</h4><p>"+plan.food_address+"</p><p>"+plan.food_city+", "+plan.food_state+" "+plan.food_zipcode+"</p>"
+
+    html_string = html_header+html_food+html_evlocation+html_evaddress
+
+    content = Content("text/html", "<html><body>" + html_string + "</body></html>")
+
+    mail = Mail(from_email, subject, to_email, content)
+
+    # Send e-mail and get status message
+    data = mail.get()
+    response = sg.client.mail.send.post(request_body=data)
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+
+    
 
 
 @app.route('/')
@@ -89,19 +128,16 @@ def create_new_user():
         # Add new user to the databased
         db.session.add(new_user)
 
-        print "GOT HERE"
         # Flush db to get new_user user_id
         db.session.flush()
 
         # Check if user has had previous invites and add them to userplans
         previously_invited = Invitee.query.filter_by(email=user_email).all()
-        print "PREVIOUSLY INVITED", previously_invited
 
         db.session.commit()
         # Loop through all previous invites and add user plans to associate to user
         if previously_invited:
             for previous_plan in previously_invited:
-                print "PREVIOUS PLAN", previous_plan
                 new_user_plan = UserPlan(plan_id=previous_plan.plan_id, user_id=new_user.user_id)
                 db.session.add(new_user_plan)
                 db.session.commit()
@@ -298,21 +334,21 @@ def edit_event_plan(plan_id):
 def choose_restaurant():
     """ Allows a user to choose a restaurant to add to plan """
 
+    # Get user preferences from first "customize" form
     plan_id = int(request.form.get("plan_id"))
     business = str(request.form.get("bar_or_rest"))
     time_before = float(request.form.get("time_before"))
     distance = float(request.form.get("distance"))
 
-
     current_plan = Plan.query.get(plan_id)
-    print current_plan
 
-    location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
+    # Calculate time to meet at restaurant/ bar and save it to plan
     food_time = current_plan.event_time - datetime.timedelta(hours=time_before)
-
     current_plan.food_time = food_time
     db.session.commit()
 
+    # Calculating parameters for Yelp API call
+    location = current_plan.event_address+" "+current_plan.event_city+" "+current_plan.event_state+ " "+current_plan.event_zipcode
     radius = int(distance * 1600)
     unix_time = int((food_time - datetime.datetime(1970, 1, 1)).total_seconds())
 
@@ -346,29 +382,29 @@ def add_plan_restaurant(plan_id):
         'Authorization': 'Bearer %s' % app.yelp_bearer_token,
     }
 
-    chosen_id = request.form.get('event_food')
-    print "CHOSEN ID", chosen_id
-    print "TYPE", type(chosen_id)
+    try: 
+        chosen_id = request.form.get('event_food')
+        food_chosen = json.loads(chosen_id)
 
-    # BUG HERE: Not finding JSON to load!
-    food_chosen = json.loads(chosen_id)
 
-    print "FOOD CHOSEN", food_chosen
+        # Get current plan and update with yelp listing details
+        current_plan = Plan.query.get(plan_id)
 
-    # Get current plan and update with yelp listing details
-    current_plan = Plan.query.get(plan_id)
+        current_plan.food_name = food_chosen['name']
+        current_plan.food_address = food_chosen['location']['address1']
+        current_plan.food_city = food_chosen['location']['city']
+        current_plan.food_state = food_chosen['location']['state']
+        current_plan.food_zipcode = food_chosen['location']['zip_code']
+        current_plan.food_longitude = food_chosen['coordinates']['longitude']
+        current_plan.food_latitude = food_chosen['coordinates']['latitude']
 
-    current_plan.food_name = food_chosen['name']
-    current_plan.food_address = food_chosen['location']['address1']
-    current_plan.food_city = food_chosen['location']['city']
-    current_plan.food_state = food_chosen['location']['state']
-    current_plan.food_zipcode = food_chosen['location']['zip_code']
-    current_plan.food_longitude = food_chosen['coordinates']['longitude']
-    current_plan.food_latitude = food_chosen['coordinates']['latitude']
+        db.session.commit()
 
-    db.session.commit()
+        return redirect('/add-friends/'+str(plan_id))
 
-    return redirect('/add-friends/'+str(plan_id))
+    except:
+        flash("Something went wrong. Please try again later.")
+        return redirect('/profile')
 
 
 @app.route('/add-friends/<plan_id>')
@@ -386,7 +422,7 @@ def add_friends(plan_id):
 
 @app.route('/add-more-friends/<plan_id>')
 def add_more_friends(plan_id):
-    """ Add users friends to plan """
+    """ Add more users friends to plan through 'add friends' button """
     plan = Plan.query.get(plan_id)
 
     return render_template("add_friends.html", plan=plan)
@@ -396,8 +432,12 @@ def add_invitees(plan_id):
     """ Add users friends to plan """
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
 
+    # Check if user inputted any friends
+    added_friends = False
+
     for friend in range(12):
         if request.form.get('fname'+str(friend)):
+            added_friends = True
             fname = request.form.get('fname'+str(friend))
             lname = request.form.get('lname'+str(friend))
             email = request.form.get('email'+str(friend))
@@ -407,14 +447,18 @@ def add_invitees(plan_id):
                                 phone=phone)
             db.session.add(new_invitee)
 
+            # E-mail user notifying of being added to plan
+            send_email(plan_id=plan_id, invitee_email=email, invitee_first_name=fname, invitee_last_name=lname)
+
             # Check if invitee has an account and add plan to their userplan
             invitee_user = User.query.filter_by(email=email).first()
-            print "INVITEE", invitee_user
+
             if invitee_user:
                 new_user_plan = UserPlan(plan_id=plan_id, user_id=invitee_user.user_id)
                 db.session.add(new_user_plan)
             
             db.session.commit()
+
 
     return redirect ('/profile')
 

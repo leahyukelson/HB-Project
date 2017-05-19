@@ -67,7 +67,7 @@ function show_businesses(yelp_json){
     bus_rating = business['rating'];
     bus_distance = Number(business['distance']/1609.03).toFixed(2); 
 
-    $('#business_buttons').append("<input type=\"radio\" name=\"event_food\" value=\'"+JSON.stringify(business)+"\''><a href="+bus_url+">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. <br>")
+    $('#business_buttons').append("<input type=\"radio\" name=\"event_food\" value=\'"+JSON.stringify(business)+"\''><a href="+bus_url+" target=\"_blank\">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. <br>")
   }
 }
 
