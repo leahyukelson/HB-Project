@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% if 'current_user' in session %}
 <h2>Event Plans</h2>
-<p><a href="/new-plan">Add a new event plan!</a></p>
+<p><a href="/profile" class="btn btn-primary">See upcoming plans</a><p>
+<p><a href="/new-plan" class="btn btn-primary">Add a new event plan</a></p>
+
+{% else %}
+    <p>Night Out lets you plan a fun night out with friends - start at a concert, comedy show, or any other event and choose a restaurant or bar to meet your friends before! Everyone gets an email with the plan so no one needs to send another "Where we meeting?" text. What are you waiting for? <a href="/create-account">Create an account today!</a>
+{% endif %}
 
 {% endblock %}

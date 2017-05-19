@@ -58,7 +58,8 @@ def send_email(plan_id, invitee_email, invitee_first_name, invitee_last_name):
     to_email = Email(invitee_email, invitee_first_name + " " + invitee_last_name)
 
     # HTML to represent body of email
-    html_header="<h3>"+plan.event_time.strftime('%x') + " " + plan.plan_name+ "</h3><h4>" + plan.event_time.strftime('%-I:%M %p')+ ": " + plan.event_name + "</h4>"
+    html_header="<h3>"+plan.event_time.strftime('%x') + " " + plan.plan_name+ "</h3>"
+    html_event = "<h4>" + plan.event_time.strftime('%-I:%M %p')+ ": " + plan.event_name + "</h4>"
     
     html_evlocation = ""
     if plan.event_location:
@@ -69,7 +70,7 @@ def send_email(plan_id, invitee_email, invitee_first_name, invitee_last_name):
     if (plan.food_name) and (plan.food_time):
         html_food = "<h4>" + plan.food_time.strftime('%-I:%M %p')+": "+plan.food_name+"</h4><p>"+plan.food_address+"</p><p>"+plan.food_city+", "+plan.food_state+" "+plan.food_zipcode+"</p>"
 
-    html_string = html_header+html_food+html_evlocation+html_evaddress
+    html_string = html_header+html_food+html_event+html_evlocation+html_evaddress
 
     content = Content("text/html", "<html><body>" + html_string + "</body></html>")
 
