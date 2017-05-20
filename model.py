@@ -118,11 +118,11 @@ def fill_example_data():
     """ Fill database with sample data to start with """
     pass
 
-def connect_to_db(app):
+def connect_to_db(app, psql_server):
     """Connect the database to our Flask app."""
 
     # Configure to use our PstgreSQL database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///eventplans'
+    app.config['SQLALCHEMY_DATABASE_URI'] = psql_server
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)
