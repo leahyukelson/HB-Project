@@ -192,17 +192,19 @@ def user_profile():
     """ Dashboard for all user's plans """
 
     # Query database for all plans for a logged-in user
-    current_user = User.query.filter_by(email=session['current_user']).first()
-    plans = current_user.plans
-    current_user_id = current_user.user_id
-
-    return render_template('all_plans.html', plans=plans, current_user=current_user_id)
+    if not 'current_user' in session:
+        return redirect('/login-form')
+    else:
+        current_user = User.query.filter_by(email=session['current_user']).first()
+        plans = current_user.plans
+        current_user_id = current_user.user_id
+        return render_template('all_plans.html', plans=plans, current_user=current_user_id)
 
 
 @app.route('/new-plan')
 def new_plan():
     """ User creates a new plan """
-    if not session['current_user']:
+     if not 'current_user' in session:
         return redirect('/login-form')
     else:
         return render_template('add_plan.html')

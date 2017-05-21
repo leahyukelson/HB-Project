@@ -116,7 +116,47 @@ class UserPlan(db.Model):
 
 def fill_example_data():
     """ Fill database with sample data to start with """
-    pass
+
+    # User without plans
+    user1 = User(first_name="Rachel", last_name="Ray", email="rachel@gmail.com", password="word", zipcode="12345")
+
+    # User with plans
+    user2 = User(first_name="Sally", last_name="Silly", email="sally@gmail.com", password="passpass", zipcode="56789")
+
+    db.session.add(user1)
+    db.session.add(user2)
+    db.session.commit()
+
+    # Plan with no food component
+    plan1 = Plan(plan_user_creator=2, plan_name="Night Out", event_name="Concert", 
+                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkely",
+                event_state="CA", event_zipcode="94720")
+
+    # Plan with food component
+    plan2 = Plan(plan_user_creator=2, plan_name="Night Out", event_name="Concert", 
+                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkeley",
+                event_state="CA", event_zipcode="94720", food_time="2018-10-03 20:00:00", food_name="Smoke's Poutinerie", food_address="2518 Durant Ave",
+                food_city="Berkeley", food_state="CA", food_zipcode="94704")
+
+    db.session.add(plan1)
+    db.session.add(plan2)
+    db.session.commit()
+
+    # Userplan for user1 to associate with plans
+    userplan1 = UserPlan(user_id=2, plan_id=2)
+    userplan2 = UserPlan(user_id=2, plan_id=2)
+
+    db.session.add(userplan1)
+    db.session.add(userplan2)
+    db.session.commit()
+
+    # Create invitees for plan2
+    invitee1 = Invitee(plan_id=2, user_id=2, first_name="Bob", last_name="Bobby", email="bobby@gmail.com", phone="3458761234")
+    invitee2 = Invitee(plan_id=2, user_id=2, first_name="Joe", last_name="Shmo", email="joeee@gmail.com", phone="3452309876")
+
+    db.session.add(invitee1)
+    db.session.add(invitee2)
+    db.session.commit()
 
 def connect_to_db(app, psql_server):
     """Connect the database to our Flask app."""
@@ -133,6 +173,6 @@ if __name__ == "__main__":
     # you in a state of being able to work with the database directly.
 
     from server import app
-    connect_to_db(app)
+    connect_to_db(app, 'postgresql:///test_plans')
     print "Connected to DB."
     db.create_all()
