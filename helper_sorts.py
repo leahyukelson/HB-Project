@@ -34,7 +34,7 @@ def merge_plans(a, b):
     # Loop through lists a and b until either list is empty
     # Add soonest plan to third list, remove from original list
     while len(a) != 0 and len(b) != 0:
-        if a[0].event_time.date() < b[0].event_time.date():
+        if a[0].event_time < b[0].event_time:
             c.append(a[0])
             a.remove(a[0])
         else:

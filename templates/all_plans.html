@@ -36,15 +36,27 @@
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
       {% endif %}
       {% endfor %}
+      {% if plan.invitees|length == 1 %}
+        {% if plan.invitees[0].email == session['current_user'] %}
+        <p>Just you!</p>
+        {% endif %}
+      {% endif %}
       {% if plan.plan_user_creator == current_user %}
-      <a href="/edit-plan/{{plan.plan_id}}" class="btn btn-primary">Edit Event</a>
-      <a href="/choose-restaurant/{{plan.plan_id}}" class="btn btn-primary">Edit Restaurant/ Bar</a>
-      <a href="/add-more-friends/{{plan.plan_id}}" class="btn btn-primary">Add Friends</a>
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Edit Plan
+      <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="/edit-plan/{{plan.plan_id}}" class="btn btn-primary">Edit Event</a></li>
+        <li><a href="/choose-restaurant/{{plan.plan_id}}" class="btn btn-primary">Edit Restaurant/ Bar</a></li>
+        <li><a href="/add-more-friends/{{plan.plan_id}}" class="btn btn-primary">Add Friends</a></li>
+      </ul>
+    <a href="/delete-plan/{{plan.plan_id}}" class="btn btn-danger">Delete Plan</a>
+        </div>
       {% endif %}
   {% endfor %}
   </div>
 
-  <div id="past" class="tab-pane fade in active">
+  <div id="past" class="tab-pane fade">
   {% for plan in past %}
       <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
       {% if (plan.food_name) and (plan.food_time) %}
@@ -67,9 +79,6 @@
       {% endif %}
       {% endfor %}
       {% if plan.plan_user_creator == current_user %}
-      <a href="/edit-plan/{{plan.plan_id}}" class="btn btn-primary">Edit Event</a>
-      <a href="/choose-restaurant/{{plan.plan_id}}" class="btn btn-primary">Edit Restaurant/ Bar</a>
-      <a href="/add-more-friends/{{plan.plan_id}}" class="btn btn-primary">Add Friends</a>
       {% endif %}
   {% endfor %}
   </div>
@@ -82,8 +91,8 @@
 <a href="/new-plan">You have no plans yet. Create one now!</a>
 {% endif %}
 
-<script src="https://code.jquery.com/jquery.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
 "use strict";
 

@@ -210,11 +210,9 @@ def user_profile():
             else:
                 past.append(plan)
 
-        # MergeSort upcoming plans by date
+        # MergeSort upcoming and past plans by date
         upcoming = mergesort_plans_by_date(upcoming)
-
-        print upcoming
-
+        plans = mergesort_plans_by_date(past)
 
         current_user_id = current_user.user_id
         return render_template('all_plans.html', upcoming=upcoming, past=past, current_user=current_user_id)
@@ -504,9 +502,27 @@ def add_invitees(plan_id):
             
             db.session.commit()
 
-
     return redirect ('/profile')
 
+@app.route('/delete-plan/<plan_id>')
+def delete_plan_ask(plan_id):
+    """ Double check that a user means to delete a plan record """
+    plan = Plan.query.get(plan_id)
+
+    return render_template("delete_plan.html", plan=plan)
+
+
+@app.route('/delete-plan/<plan_id>', methods=['POST'])
+def delete_plan_forever(plan_id):
+    """ Double check that a user means to delete a plan record """
+    plan = Plan.query.get(plan_id)
+
+    db.session.delete(plan)
+    db.session.commit()
+
+    flash(plan.plan_name + " Plan has been deleted")
+
+    return redirect('/profile')
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the

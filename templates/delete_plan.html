@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if 'current_user' in session %}
+    <h2>Are you sure you want to delete this plan? This action may not be undone.</h2>
+
+    <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
+      {% if (plan.food_name) and (plan.food_time) %}
+      <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
+        <p>{{plan.food_address}}</p>
+        <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>  
+      {% endif %}
+      <h4>{{plan.event_time.strftime('%-I:%M %p') }}: {{plan.event_name}}</h4>
+        {% if plan.event_location %}
+        <p>{{plan.event_location}}</p>
+        {% endif %}
+        <p>{{plan.event_address}}</p>
+        <p>{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
+      {% if plan.invitees %}
+      <h4>Friends Invited:</h4>
+      {% endif %}
+      {% for invitees in plan.invitees %}
+        {% if not invitees.email == session['current_user']  %}
+        <p>{{invitees.first_name}} {{invitees.last_name}}</p>
+      {% endif %}
+      {% endfor %}
+
+    <form id="delete_plan_form" action="/delete-plan/{{plan.plan_id}}" method="POST"> 
+      <input type="submit" id="submit_button" value="Delete Plan Forever">
+    </form>
+
+{% else %}
+    <a href="/login-form" class="btn btn-primary">Log In</a>
+    <a href="/create-account" class="btn btn-primary">Create Account</a>
+{% endif %}
+
+{% endblock %}
