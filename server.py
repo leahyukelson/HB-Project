@@ -26,8 +26,9 @@ app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
 
+# API HELPER FUNCTIONS
 def get_yelp_bearer_token():
-    """ Get and cache yelp token id """
+    """ Call Yelp API to attain a bearer token """
 
     # OS environ for client ID would not be accepted on Yelp side
     data = urlencode({
@@ -84,8 +85,6 @@ def send_email(plan_id, invitee_email, invitee_first_name, invitee_last_name):
     print(response.headers)
 
     
-
-
 @app.route('/')
 def index():
     """Homepage."""
@@ -204,7 +203,7 @@ def user_profile():
 @app.route('/new-plan')
 def new_plan():
     """ User creates a new plan """
-     if not 'current_user' in session:
+    if not 'current_user' in session:
         return redirect('/login-form')
     else:
         return render_template('add_plan.html')
@@ -337,6 +336,7 @@ def edit_event_plan(plan_id):
 def choose_restaurant():
     """ Allows a user to choose a restaurant to add to plan """
 
+
     # Get user preferences from first "customize" form
     plan_id = int(request.form.get("plan_id"))
     business = str(request.form.get("bar_or_rest"))
@@ -366,10 +366,31 @@ def choose_restaurant():
         'radius': radius,
     }
 
-    r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
-    response = r.json()
+    try:
+        r = requests.request('GET', 'https://api.yelp.com/v3/businesses/search', headers=headers, params=rest_url_params)
+        response = r.json()
+        businesses = response['businesses']
+        
+        # Get current user's plans to determine which business locations they have visited
+        current_user = User.query.filter_by(email=session['current_user']).first()
+        plans = current_user.plans
+        prior_businesses = set([])
 
-    return jsonify(response['businesses'])
+        # Loop through plans to add previously visited businesses
+        for plan in plans:
+            prior_businesses.add(plan.food_name)
+
+        # Loop through businesses and determine which user has selected in previous plans
+        for business in businesses:
+            if business['name'] in prior_businesses:
+                business['prior'] = True
+            else:
+                business['prior'] = False
+
+        return jsonify(businesses)
+    except:
+        flash("Something went wrong! Please try again later.")
+        return redirect('/profile')
 
 
 @app.route('/choose-restaurant/<plan_id>')

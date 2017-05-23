@@ -32,6 +32,7 @@
 
 <div id="restaurant_options" hidden>
 <h4>Choose one:</h4>
+<p>Highlighted businesses are restaurants or bars that have appeared in your Night Out plans</p>
 <form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST">
   <div id="business_buttons"></div>
       <input type="submit" id="submit_button">
@@ -40,8 +41,8 @@
 
 
 {% else %}
-    <li><a href="/login-form">Log In</a></li>
-    <li><a href="/create-account">Create Account</a></li>
+    <a href="/login-form" class="btn btn-primary">Log In</a>
+    <a href="/create-account" class="btn btn-primary">Create Account</a>
 {% endif %}
 
 <script src="https://code.jquery.com/jquery.js"></script>
@@ -56,7 +57,9 @@ function show_businesses(yelp_json){
     var bus_url;
     var bus_name;
     var bus_rating;
-    var bus_distance
+    var bus_distance;
+    var bus_prior;
+    var bus_id;
 
   for (var bus=0; bus < yelp_json.length; bus ++){
     // Radio buttons for business options
@@ -66,8 +69,13 @@ function show_businesses(yelp_json){
     bus_name = business['name'];
     bus_rating = business['rating'];
     bus_distance = Number(business['distance']/1609.03).toFixed(2); 
+    bus_prior = business['prior'];
 
-    $('#business_buttons').append("<input type=\"radio\" name=\"event_food\" value=\'"+JSON.stringify(business)+"\''><a href="+bus_url+" target=\"_blank\">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. <br>")
+    $('#business_buttons').append("<p id=\""+bus_id+"\"><input type=\"radio\" name=\"event_food\" value=\'"+JSON.stringify(business)+"\''><a href="+bus_url+" target=\"_blank\">"+bus_name+"</a><br>Yelp Rating: "+bus_rating+"<br>Distance from Event: "+bus_distance+" mi. </p>");
+
+    if (bus_prior = true) {
+      $('#'+bus_id).css("background-color", "#ffff99");
+    }
   }
 }
 

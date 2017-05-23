@@ -7,6 +7,7 @@
     {% else %}
     <h2>Add up to 12 friends</h2>
     {% endif %}
+    <a href="/profile" class="btn btn-primary">Add friends later</a>
     <form id="add_friends_plan" action="/add-friends/{{plan.plan_id }}" method="POST">
     {% for friend in range(12- plan.invitees|length) %}
     <p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</p> 
@@ -18,11 +19,10 @@
       <input type="submit" id="submit_button">
     </form>
 
-    <a href="/profile">Add friends later</a>
 
 {% else %}
-    <li><a href="/login-form">Log In</a></li>
-    <li><a href="/create-account">Create Account</a></li>
+    <a href="/login-form" class="btn btn-primary">Log In</a>
+    <a href="/create-account" class="btn btn-primary">Create Account</a>
 {% endif %}
 
 {% endblock %}

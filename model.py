@@ -1,6 +1,7 @@
 """Models and database functions """
 
 from flask_sqlalchemy import SQLAlchemy
+import bcrypt
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -118,10 +119,10 @@ def fill_example_data():
     """ Fill database with sample data to start with """
 
     # User without plans
-    user1 = User(first_name="Rachel", last_name="Ray", email="rachel@gmail.com", password="word", zipcode="12345")
+    user1 = User(first_name="Rachel", last_name="Ray", email="rachel@gmail.com", password=bcrypt.hashpw("word", bcrypt.gensalt(9)), zipcode="12345")
 
     # User with plans
-    user2 = User(first_name="Sally", last_name="Silly", email="sally@gmail.com", password="passpass", zipcode="56789")
+    user2 = User(first_name="Sally", last_name="Silly", email="sally@gmail.com", password=bcrypt.hashpw("passpass", bcrypt.gensalt(9)), zipcode="56789")
 
     db.session.add(user1)
     db.session.add(user2)
@@ -129,7 +130,7 @@ def fill_example_data():
 
     # Plan with no food component
     plan1 = Plan(plan_user_creator=2, plan_name="Night Out", event_name="Concert", 
-                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkely",
+                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkeley",
                 event_state="CA", event_zipcode="94720")
 
     # Plan with food component
