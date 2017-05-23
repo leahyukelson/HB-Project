@@ -188,7 +188,10 @@ def check_login():
 
 @app.route('/profile')
 def user_profile():
-    """ Dashboard for all user's plans """
+    """ Dashboard for all user's plans 
+
+    Orders plans by time to show past and current plans in profile
+    """
 
     # Query database for all plans for a logged-in user
     if not 'current_user' in session:
@@ -196,8 +199,19 @@ def user_profile():
     else:
         current_user = User.query.filter_by(email=session['current_user']).first()
         plans = current_user.plans
+
+        upcoming = []
+        past = []
+        now = datetime.datetime.now()
+
+        for plan in plans:
+            if plan.event_time >= now:
+                upcoming.append(plan)
+            else:
+                past.append(plan)
+
         current_user_id = current_user.user_id
-        return render_template('all_plans.html', plans=plans, current_user=current_user_id)
+        return render_template('all_plans.html', plans=plans, upcoming=upcoming, past=past, current_user=current_user_id)
 
 
 @app.route('/new-plan')
@@ -473,6 +487,7 @@ def add_invitees(plan_id):
 
             # E-mail user notifying of being added to plan
             send_email(plan_id=plan_id, invitee_email=email, invitee_first_name=fname, invitee_last_name=lname)
+            flash("Email invite sent to {}".format(invitee_email))
 
             # Check if invitee has an account and add plan to their userplan
             invitee_user = User.query.filter_by(email=email).first()

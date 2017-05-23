@@ -1,39 +1,94 @@
 {% extends 'base.html' %}
 {% block content %}
 
+
 {% if plans %}
 <h2>Plans</h2>
 <a href="/new-plan" class="btn btn-primary">Create New</a>
-  {% for plan in plans %}
+
+<br><br>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#upcoming">Upcoming</a></li>
+  <li><a data-toggle="tab" href="#past">Past</a></li>
+</ul>
+
+<div class="tab-content">
+  <div id="upcoming" class="tab-pane fade in active">
+  {% for plan in upcoming %}
       <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
+      {% if (plan.food_name) and (plan.food_time) %}
+      <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
+        <p>{{plan.food_address}}</p>
+        <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>  
+      {% endif %}
       <h4>{{plan.event_time.strftime('%-I:%M %p') }}: {{plan.event_name}}</h4>
         {% if plan.event_location %}
         <p>{{plan.event_location}}</p>
         {% endif %}
         <p>{{plan.event_address}}</p>
         <p>{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
-      {% if (plan.food_name) and (plan.food_time) %}
-      <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
-        <p>{{plan.food_address}}</p>
-        <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>  
-      {% endif %}
       {% if plan.invitees %}
       <h4>Friends Invited:</h4>
+      {% endif %}
       {% for invitees in plan.invitees %}
         {% if not invitees.email == session['current_user']  %}
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
-        {% endif %}
-      {% endfor %}
       {% endif %}
+      {% endfor %}
       {% if plan.plan_user_creator == current_user %}
       <a href="/edit-plan/{{plan.plan_id}}" class="btn btn-primary">Edit Event</a>
       <a href="/choose-restaurant/{{plan.plan_id}}" class="btn btn-primary">Edit Restaurant/ Bar</a>
       <a href="/add-more-friends/{{plan.plan_id}}" class="btn btn-primary">Add Friends</a>
       {% endif %}
   {% endfor %}
+  </div>
+
+  <div id="past" class="tab-pane fade in active">
+  {% for plan in past %}
+      <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
+      {% if (plan.food_name) and (plan.food_time) %}
+      <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
+        <p>{{plan.food_address}}</p>
+        <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>  
+      {% endif %}
+      <h4>{{plan.event_time.strftime('%-I:%M %p') }}: {{plan.event_name}}</h4>
+        {% if plan.event_location %}
+        <p>{{plan.event_location}}</p>
+        {% endif %}
+        <p>{{plan.event_address}}</p>
+        <p>{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
+      {% if plan.invitees %}
+      <h4>Friends Invited:</h4>
+      {% endif %}
+      {% for invitees in plan.invitees %}
+        {% if not invitees.email == session['current_user']  %}
+        <p>{{invitees.first_name}} {{invitees.last_name}}</p>
+      {% endif %}
+      {% endfor %}
+      {% if plan.plan_user_creator == current_user %}
+      <a href="/edit-plan/{{plan.plan_id}}" class="btn btn-primary">Edit Event</a>
+      <a href="/choose-restaurant/{{plan.plan_id}}" class="btn btn-primary">Edit Restaurant/ Bar</a>
+      <a href="/add-more-friends/{{plan.plan_id}}" class="btn btn-primary">Add Friends</a>
+      {% endif %}
+  {% endfor %}
+  </div>
+
+
+</div>
+
+
 {% else %}
 <a href="/new-plan">You have no plans yet. Create one now!</a>
 {% endif %}
 
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+"use strict";
+
+
+
+</script>
 
 {% endblock %}
