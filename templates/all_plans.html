@@ -2,7 +2,7 @@
 {% block content %}
 
 
-{% if plans %}
+{% if (upcoming) or (past) %}
 <h2>Plans</h2>
 <a href="/new-plan" class="btn btn-primary">Create New</a>
 

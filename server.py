@@ -13,6 +13,7 @@ import bcrypt
 import json
 import sendgrid
 from sendgrid.helpers.mail import *
+from helper_sorts import *
 
 
 app = Flask(__name__)
@@ -83,7 +84,6 @@ def send_email(plan_id, invitee_email, invitee_first_name, invitee_last_name):
     print(response.status_code)
     print(response.body)
     print(response.headers)
-
     
 @app.route('/')
 def index():
@@ -210,8 +210,14 @@ def user_profile():
             else:
                 past.append(plan)
 
+        # MergeSort upcoming plans by date
+        upcoming = mergesort_plans_by_date(upcoming)
+
+        print upcoming
+
+
         current_user_id = current_user.user_id
-        return render_template('all_plans.html', plans=plans, upcoming=upcoming, past=past, current_user=current_user_id)
+        return render_template('all_plans.html', upcoming=upcoming, past=past, current_user=current_user_id)
 
 
 @app.route('/new-plan')

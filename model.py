@@ -62,7 +62,7 @@ class Plan(db.Model):
 
     def __repr__(self):
         """Provide helpful representation when printed."""
-        return "<Plan plan_id=%s event_name=%s>" % (self.plan_id, self.event_name)    
+        return "<Plan event_time=%s plan_id=%s event_name=%s>" % (self.event_time, self.plan_id, self.event_name)    
 
 
 class Invitee(db.Model):
