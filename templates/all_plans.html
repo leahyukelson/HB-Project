@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<style type="text/css">
+
+  .options {
+    display: inline-block;
+  }
+
+
+</style>
 
 {% if (upcoming) or (past) %}
 <h2>Plans</h2>
@@ -42,17 +50,18 @@
         {% endif %}
       {% endif %}
       {% if plan.plan_user_creator == current_user %}
-    <div class="dropdown">
+    <div class="dropdown options">
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Edit Plan
       <span class="caret"></span></button>
       <ul class="dropdown-menu">
-        <li><a href="/edit-plan/{{plan.plan_id}}" class="btn btn-primary">Edit Event</a></li>
-        <li><a href="/choose-restaurant/{{plan.plan_id}}" class="btn btn-primary">Edit Restaurant/ Bar</a></li>
-        <li><a href="/add-more-friends/{{plan.plan_id}}" class="btn btn-primary">Add Friends</a></li>
+        <li><a href="/edit-plan/{{plan.plan_id}}">Edit Event</a></li>
+        <li><a href="/choose-restaurant/{{plan.plan_id}}">Edit Restaurant/ Bar</a></li>
+        <li><a href="/add-more-friends/{{plan.plan_id}}">Add Friends</a></li>
       </ul>
+      </div>
     <a href="/delete-plan/{{plan.plan_id}}" class="btn btn-danger">Delete Plan</a>
-        </div>
       {% endif %}
+    <button class="btn btn-warning decline_plan_btn" value="/decline-plan/{{plan.plan_id}}">Decline Plan</button>
   {% endfor %}
   </div>
 
@@ -78,25 +87,34 @@
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
       {% endif %}
       {% endfor %}
-      {% if plan.plan_user_creator == current_user %}
-      {% endif %}
   {% endfor %}
   </div>
-
-
 </div>
-
 
 {% else %}
 <a href="/new-plan">You have no plans yet. Create one now!</a>
 {% endif %}
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
 "use strict";
+console.log("READING");
 
+var decline_url;
 
+function decline_plan(evt) {
+  evt.preventDefault();
+
+  if (confirm("Are you sure you would no longer like to attend this plan?") == true) {
+      decline_url = this.value;
+      console.log(decline_url);
+      $.post(decline_url, {});
+      alert("This plan is no longer in your profile");
+  }
+}
+
+$(".decline_plan_btn").on("click", decline_plan);
 
 </script>
 

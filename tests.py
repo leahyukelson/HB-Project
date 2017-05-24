@@ -177,18 +177,18 @@ class NightPlanTests(unittest.TestCase):
                                 data={'email': 'rachel@gmail.com',
                                       'password': 'oopsy'},
                                 follow_redirects=True)
-        self.assertIn("No user with that email", result.data)
+        self.assertIn("Wrong password!", result.data)
         self.assertIn("Log In", result.data)
         self.assertNotIn("You are now logged in!", result.data)
 
     def test_login_wrong_email(self):
-        """ Test to check redirect when logging on with incorrect password """
+        """ Test to check redirect when logging on with incorrect email """
         result = self.client.post("/check-login",
                                 data={'email': 'oopsy@gmail.com',
                                       'password': 'oopsy'},
                                 follow_redirects=True)
 
-        self.assertIn("Wrong password!", result.data)
+        self.assertIn("No user with that email", result.data)
         self.assertIn("Create Account", result.data)
         self.assertNotIn("You are now logged in!", result.data)
 

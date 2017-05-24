@@ -2,8 +2,8 @@
 
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
-from flask import (Flask, render_template, redirect, request, flash,
-                   session, jsonify)
+from flask import Flask, render_template, redirect, request, flash, session, jsonify, g, url_for
+from functools import wraps
 from model import *
 import datetime
 import requests
@@ -84,6 +84,29 @@ def send_email(plan_id, invitee_email, invitee_first_name, invitee_last_name):
     print(response.status_code)
     print(response.body)
     print(response.headers)
+
+# Login Required Decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not 'current_user' in session:
+            return redirect('/login-form')
+        return f(*args, **kwargs)
+    return decorated_function
+
+# User must have access to plan id
+def requires_plan_access(plan_id):
+    # Get plan_id from the url of that route
+    plan = Plan.query.get(plan_id)
+
+    # Get user's id from session
+    current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
+
+    # Redirect user back to their profile if 
+    if plan.plan_user_creator != current_user_id:
+        return False
+    return True
+
     
 @app.route('/')
 def index():
@@ -187,6 +210,7 @@ def check_login():
 
 
 @app.route('/profile')
+@login_required
 def user_profile():
     """ Dashboard for all user's plans 
 
@@ -194,39 +218,35 @@ def user_profile():
     """
 
     # Query database for all plans for a logged-in user
-    if not 'current_user' in session:
-        return redirect('/login-form')
-    else:
-        current_user = User.query.filter_by(email=session['current_user']).first()
-        plans = current_user.plans
+    current_user = User.query.filter_by(email=session['current_user']).first()
+    plans = current_user.plans
 
-        upcoming = []
-        past = []
-        now = datetime.datetime.now()
+    upcoming = []
+    past = []
+    now = datetime.datetime.now()
 
-        for plan in plans:
-            if plan.event_time >= now:
-                upcoming.append(plan)
-            else:
-                past.append(plan)
+    for plan in plans:
+        if plan.event_time >= now:
+            upcoming.append(plan)
+        else:
+            past.append(plan)
 
-        # MergeSort upcoming and past plans by date
-        upcoming = mergesort_plans_by_date(upcoming)
-        plans = mergesort_plans_by_date(past)
+    # MergeSort upcoming and past plans by date
+    upcoming = mergesort_plans_by_date(upcoming)
+    plans = mergesort_plans_by_date(past)
 
-        current_user_id = current_user.user_id
-        return render_template('all_plans.html', upcoming=upcoming, past=past, current_user=current_user_id)
+    current_user_id = current_user.user_id
+    return render_template('all_plans.html', upcoming=upcoming, past=past, current_user=current_user_id)
 
 
 @app.route('/new-plan')
+@login_required
 def new_plan():
     """ User creates a new plan """
-    if not 'current_user' in session:
-        return redirect('/login-form')
-    else:
-        return render_template('add_plan.html')
+    return render_template('add_plan.html')
 
 @app.route('/new-plan', methods=['POST'])
+@login_required
 def add_new_plan():
     """ Adds event to user's new plan """
 
@@ -272,6 +292,7 @@ def add_new_plan():
     return redirect('/choose-restaurant/'+str(current_plan_id))
 
 @app.route('/edit-plan/<plan_id>')
+@login_required
 def edit_plan(plan_id):
     """ User edits an existing plan they own """
     
@@ -301,6 +322,7 @@ def edit_plan(plan_id):
 
 
 @app.route('/edit-plan/<plan_id>', methods=['POST'])
+@login_required
 def edit_event_plan(plan_id):
     """ Adds event to user's new plan """
     plan = Plan.query.get(plan_id)
@@ -412,18 +434,16 @@ def choose_restaurant():
 
 
 @app.route('/choose-restaurant/<plan_id>')
+@login_required
 def customize_restaurant(plan_id):
     """ Allows a user to customize distance from location, time meeting and whether a restaurant or bar """
     return render_template("customize_business.html", current_plan_id=plan_id)
 
 
 @app.route('/choose-restaurant/<plan_id>', methods=['POST'])
+@login_required
 def add_plan_restaurant(plan_id):
     """ Adds restaurant or bar to user's current plan """
-    headers = {
-        'Authorization': 'Bearer %s' % app.yelp_bearer_token,
-    }
-
     try: 
         chosen_id = request.form.get('event_food')
         food_chosen = json.loads(chosen_id)
@@ -450,6 +470,7 @@ def add_plan_restaurant(plan_id):
 
 
 @app.route('/add-friends/<plan_id>')
+@login_required
 def add_friends(plan_id):
     """ Add users friends to plan """
     plan = Plan.query.get(plan_id)
@@ -463,6 +484,7 @@ def add_friends(plan_id):
 
 
 @app.route('/add-more-friends/<plan_id>')
+@login_required
 def add_more_friends(plan_id):
     """ Add more users friends to plan through 'add friends' button """
     plan = Plan.query.get(plan_id)
@@ -470,6 +492,7 @@ def add_more_friends(plan_id):
     return render_template("add_friends.html", plan=plan)
 
 @app.route('/add-friends/<plan_id>', methods=['POST'])
+@login_required
 def add_invitees(plan_id):
     """ Add users friends to plan """
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
@@ -505,6 +528,7 @@ def add_invitees(plan_id):
     return redirect ('/profile')
 
 @app.route('/delete-plan/<plan_id>')
+@login_required
 def delete_plan_ask(plan_id):
     """ Double check that a user means to delete a plan record """
     plan = Plan.query.get(plan_id)
@@ -513,6 +537,7 @@ def delete_plan_ask(plan_id):
 
 
 @app.route('/delete-plan/<plan_id>', methods=['POST'])
+@login_required
 def delete_plan_forever(plan_id):
     """ Double check that a user means to delete a plan record """
     plan = Plan.query.get(plan_id)
@@ -523,6 +548,25 @@ def delete_plan_forever(plan_id):
     flash(plan.plan_name + " Plan has been deleted")
 
     return redirect('/profile')
+
+
+@app.route('/decline-plan/<plan_id>', methods=['POST'])
+@login_required
+def decline_plan(plan_id):
+
+    current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
+
+    userplan_decline = UserPlan.query.filter(UserPlan.plan_id == plan_id and UserPlan.user_id == current_user_id).all()
+    print userplan_decline
+
+
+    for userplan in userplan_decline:
+        db.session.delete(userplan)
+    
+    db.session.commit()
+
+    return redirect('/profile')
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
