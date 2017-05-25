@@ -124,8 +124,12 @@ def fill_example_data():
     # User with plans
     user2 = User(first_name="Sally", last_name="Silly", email="sally@gmail.com", password=bcrypt.hashpw("passpass", bcrypt.gensalt(9)), zipcode="56789")
 
+    # User with plans
+    user3 = User(first_name="Sam", last_name="Silly", email="sammy@gmail.com", password=bcrypt.hashpw("passhash", bcrypt.gensalt(9)), zipcode="56789")
+
     db.session.add(user1)
     db.session.add(user2)
+    db.session.add(user3)
     db.session.commit()
 
     # Plan with no food component
@@ -139,16 +143,34 @@ def fill_example_data():
                 event_state="CA", event_zipcode="94720", food_time="2018-10-03 20:00:00", food_name="Smoke's Poutinerie", food_address="2518 Durant Ave",
                 food_city="Berkeley", food_state="CA", food_zipcode="94704")
 
+    # Plan with food component
+    plan3 = Plan(plan_user_creator=3, plan_name="Night Out", event_name="Concert", 
+                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkeley",
+                event_state="CA", event_zipcode="94720", food_time="2018-10-03 20:00:00", food_name="Smoke's Poutinerie", food_address="2518 Durant Ave",
+                food_city="Berkeley", food_state="CA", food_zipcode="94704")
+
+    # Plan in the past
+    plan4 = Plan(plan_user_creator=2, plan_name="Night Out", event_name="Concert", 
+                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkeley",
+                event_state="CA", event_zipcode="94720", food_time="2018-10-03 20:00:00", food_name="Smoke's Poutinerie", food_address="2518 Durant Ave",
+                food_city="Berkeley", food_state="CA", food_zipcode="94704")
+
     db.session.add(plan1)
     db.session.add(plan2)
+    db.session.add(plan3)
+    db.session.add(plan4)
     db.session.commit()
 
     # Userplan for user1 to associate with plans
-    userplan1 = UserPlan(user_id=2, plan_id=2)
+    userplan1 = UserPlan(user_id=2, plan_id=1)
     userplan2 = UserPlan(user_id=2, plan_id=2)
+    userplan3 = UserPlan(user_id=3, plan_id=3)
+    userplan4 = UserPlan(user_id=2, plan_id=4)
 
     db.session.add(userplan1)
     db.session.add(userplan2)
+    db.session.add(userplan3)
+    db.session.add(userplan4)
     db.session.commit()
 
     # Create invitees for plan2

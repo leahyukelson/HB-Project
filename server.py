@@ -95,9 +95,16 @@ def login_required(f):
     return decorated_function
 
 def plan_access(plan_id):
-    """ Helper function to check user has access to the url for specific plan id """
+    """ Helper function to check user has access to the url for specific plan id 
+
+    Additionally, check that plan_id exists
+    """
     # Get plan_id from the url of that route
     plan = Plan.query.get(plan_id)
+
+    # If plan does not exist in database
+    if not plan:
+        return False
 
     # Get user's id from session
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
@@ -111,6 +118,8 @@ def plan_access(plan_id):
 @app.route('/')
 def index():
     """Homepage."""
+    if 'current_user' in session:
+        return redirect('/profile')
     return render_template("homepage.html")
 
 
@@ -263,6 +272,9 @@ def add_new_plan():
     new_plan_city = request.form.get('city')
     new_plan_zipcode = request.form.get('zipcode')
 
+    # Strip off extra address details added by Google Autofill
+    new_plan_location = new_plan_location.split(",")[0]
+
     new_plan_address = new_plan_number + " " + new_plan_street
     # If user chooses to not name plan right away - defaults to the event name
     if new_plan_name == "":
@@ -301,25 +313,14 @@ def edit_plan(plan_id):
         current_user = User.query.filter_by(email=session['current_user']).first().user_id
         plan = Plan.query.get(plan_id)
 
-        # Check plan_id exists and that current user is the creator
-        if not plan:
-            flash("Plan does not exist")
-            return redirect('/profile')
+        # Separate date and time from datetime object in database
+        plan_datetime = plan.event_time
+        plan_date = plan_datetime.date()
+        plan_date = plan_date.strftime("%Y-%m-%d")
+        plan_time = plan_datetime.time()
+        plan_time = plan_time.strftime("%H:%M")
 
-        elif current_user != plan.plan_user_creator:
-            flash("Only plan creator may edit plan")
-            return redirect('/profile')   
-
-        else:
-
-            # Separate date and time from datetime object in database
-            plan_datetime = plan.event_time
-            plan_date = plan_datetime.date()
-            plan_date = plan_date.strftime("%Y-%m-%d")
-            plan_time = plan_datetime.time()
-            plan_time = plan_time.strftime("%H:%M")
-
-            return render_template('edit_plan.html', plan=plan, plan_date=plan_date, plan_time=plan_time)
+        return render_template('edit_plan.html', plan=plan, plan_date=plan_date, plan_time=plan_time)
     else:
         flash("You don't have edit access to this plan")
         return redirect('/profile')
@@ -345,6 +346,9 @@ def edit_event_plan(plan_id):
         new_plan_state = request.form.get('state')
         new_plan_city = request.form.get('city')
         new_plan_zipcode = request.form.get('zipcode')
+
+        # Strip off extra address details added by Google Autofill
+        new_plan_location = new_plan_location.split(",")[0]
 
         # Mark if event's location has changed to allow user to choose a different restaurant
         if new_plan_location != plan.event_location:
@@ -412,7 +416,7 @@ def choose_restaurant():
     rest_url_params = {
         'term': business,
         'location': location.replace(' ', '+'),
-        'limit': 20,
+        'limit': 50,
         'radius': radius,
     }
 
@@ -427,12 +431,16 @@ def choose_restaurant():
         prior_businesses = set([])
 
         # Loop through plans to add previously visited businesses
+        # Businesses are considered unique based on a combination of name and zipcode
         for plan in plans:
-            prior_businesses.add(plan.food_name)
+            if plan.food_name:
+                prior_businesses.add(plan.food_name+str(plan.food_zipcode))
+
+        print prior_businesses
 
         # Loop through businesses and determine which user has selected in previous plans
         for business in businesses:
-            if business['name'] in prior_businesses:
+            if business['name']+str(business['location']['zip_code']) in prior_businesses:
                 business['prior'] = True
             else:
                 business['prior'] = False
@@ -598,8 +606,6 @@ def decline_plan(plan_id):
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
 
     userplan_decline = UserPlan.query.filter(UserPlan.plan_id == plan_id and UserPlan.user_id == current_user_id).all()
-    print userplan_decline
-
 
     for userplan in userplan_decline:
         db.session.delete(userplan)

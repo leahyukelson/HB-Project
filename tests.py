@@ -420,6 +420,35 @@ class NightPlanTests(unittest.TestCase):
         plan = Plan.query.get(2)
         self.assertIn("Bill Graham Civic Center", plan.event_location)
 
+    def test_edit_nonexistant_plan(self):
+        """ Test for attempting to edit a plan that does not exist """
+
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.get('/edit-plan/16', follow_redirects=True)
+        self.assertIn(">You don&#39;t have edit access to this plan", result.data)
+        self.assertIn("Plans", result.data)
+        self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
+        self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")
+
+    def test_edit_plan_no_access(self):
+        """ Test for attempting to edit a plan that user does not own """
+
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.get('/edit-plan/3', follow_redirects=True)
+        self.assertIn(">You don&#39;t have edit access to this plan", result.data)
+        self.assertIn("Plans", result.data)
+        self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
+        self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")
+
+
 
 if __name__ == "__main__":
     # Call testing function to run
