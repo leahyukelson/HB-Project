@@ -94,8 +94,8 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# User must have access to plan id
-def requires_plan_access(plan_id):
+def plan_access(plan_id):
+    """ Helper function to check user has access to the url for specific plan id """
     # Get plan_id from the url of that route
     plan = Plan.query.get(plan_id)
 
@@ -295,84 +295,94 @@ def add_new_plan():
 @login_required
 def edit_plan(plan_id):
     """ User edits an existing plan they own """
-    
-    # Pull current user from session and plan id from route
-    current_user = User.query.filter_by(email=session['current_user']).first().user_id
-    plan = Plan.query.get(plan_id)
 
-    # Check plan_id exists and that current user is the creator
-    if not plan:
-        flash("Plan does not exist")
-        return redirect('/profile')
+    if plan_access(plan_id):  
+        # Pull current user from session and plan id from route
+        current_user = User.query.filter_by(email=session['current_user']).first().user_id
+        plan = Plan.query.get(plan_id)
 
-    elif current_user != plan.plan_user_creator:
-        flash("Only plan creator may edit plan")
-        return redirect('/profile')   
+        # Check plan_id exists and that current user is the creator
+        if not plan:
+            flash("Plan does not exist")
+            return redirect('/profile')
 
+        elif current_user != plan.plan_user_creator:
+            flash("Only plan creator may edit plan")
+            return redirect('/profile')   
+
+        else:
+
+            # Separate date and time from datetime object in database
+            plan_datetime = plan.event_time
+            plan_date = plan_datetime.date()
+            plan_date = plan_date.strftime("%Y-%m-%d")
+            plan_time = plan_datetime.time()
+            plan_time = plan_time.strftime("%H:%M")
+
+            return render_template('edit_plan.html', plan=plan, plan_date=plan_date, plan_time=plan_time)
     else:
-
-        # Separate date and time from datetime object in database
-        plan_datetime = plan.event_time
-        plan_date = plan_datetime.date()
-        plan_date = plan_date.strftime("%Y-%m-%d")
-        plan_time = plan_datetime.time()
-        plan_time = plan_time.strftime("%H:%M")
-
-        return render_template('edit_plan.html', plan=plan, plan_date=plan_date, plan_time=plan_time)
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
 
 
 @app.route('/edit-plan/<plan_id>', methods=['POST'])
 @login_required
 def edit_event_plan(plan_id):
     """ Adds event to user's new plan """
-    plan = Plan.query.get(plan_id)
 
-    # Extract data from plan form
-    new_plan_name = request.form.get('plan_name')
-    new_event_name = request.form.get('event_name')
-    new_plan_date = request.form.get('event_date')
-    new_plan_time = request.form.get('event_time')
-    new_event_datetime = datetime.datetime.strptime(new_plan_date + " " + new_plan_time, "%Y-%m-%d %H:%M")
-    new_plan_location = request.form.get('location')
-    new_plan_number = request.form.get('number')
-    new_plan_street = request.form.get('street')
-    new_plan_state = request.form.get('state')
-    new_plan_city = request.form.get('city')
-    new_plan_zipcode = request.form.get('zipcode')
+    if plan_access(plan_id):
+        plan = Plan.query.get(plan_id)
 
-    # Mark if event's location has changed to allow user to choose a different restaurant
-    if new_plan_location != plan.event_location:
-        different_location = True
+        # Extract data from plan form
+        new_plan_name = request.form.get('plan_name')
+        new_event_name = request.form.get('event_name')
+        new_plan_date = request.form.get('event_date')
+        new_plan_time = request.form.get('event_time')
+        new_event_datetime = datetime.datetime.strptime(new_plan_date + " " + new_plan_time, "%Y-%m-%d %H:%M")
+        new_plan_location = request.form.get('location')
+        new_plan_number = request.form.get('number')
+        new_plan_street = request.form.get('street')
+        new_plan_state = request.form.get('state')
+        new_plan_city = request.form.get('city')
+        new_plan_zipcode = request.form.get('zipcode')
+
+        # Mark if event's location has changed to allow user to choose a different restaurant
+        if new_plan_location != plan.event_location:
+            different_location = True
+        else:
+            different_location = False
+
+        new_plan_address = new_plan_number + " " + new_plan_street
+
+        # If user chooses to not name plan right away - defaults to the event name
+        if new_plan_name == "":
+            new_plan_name = new_event_name
+
+        current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
+
+        # Edit plan object with plan attributes
+        plan.plan_name = new_plan_name
+        plan.event_name = new_event_name
+        plan.event_time = new_event_datetime
+        plan.event_location = new_plan_location
+        plan.event_address = new_plan_address
+        plan.event_state = new_plan_state
+        plan.event_city = new_plan_city
+        plan.event_zipcode = new_plan_zipcode
+
+        db.session.commit()
+
+        if different_location == False:
+            return redirect('/profile')
+        else:
+            return redirect('/choose-restaurant/'+str(plan.plan_id))
     else:
-        different_location = False
-
-    new_plan_address = new_plan_number + " " + new_plan_street
-
-    # If user chooses to not name plan right away - defaults to the event name
-    if new_plan_name == "":
-        new_plan_name = new_event_name
-
-    current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
-
-    # Edit plan object with plan attributes
-    plan.plan_name = new_plan_name
-    plan.event_name = new_event_name
-    plan.event_time = new_event_datetime
-    plan.event_location = new_plan_location
-    plan.event_address = new_plan_address
-    plan.event_state = new_plan_state
-    plan.event_city = new_plan_city
-    plan.event_zipcode = new_plan_zipcode
-
-    db.session.commit()
-
-    if different_location == False:
+        flash("You don't have edit access to this plan")
         return redirect('/profile')
-    else:
-        return redirect('/choose-restaurant/'+str(plan.plan_id))
 
 
 @app.route('/yelp.json', methods=["POST"])
+@login_required
 def choose_restaurant():
     """ Allows a user to choose a restaurant to add to plan """
 
@@ -437,35 +447,43 @@ def choose_restaurant():
 @login_required
 def customize_restaurant(plan_id):
     """ Allows a user to customize distance from location, time meeting and whether a restaurant or bar """
-    return render_template("customize_business.html", current_plan_id=plan_id)
+    if plan_access(plan_id):
+        return render_template("customize_business.html", current_plan_id=plan_id)
+    else:
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
 
 
 @app.route('/choose-restaurant/<plan_id>', methods=['POST'])
 @login_required
 def add_plan_restaurant(plan_id):
     """ Adds restaurant or bar to user's current plan """
-    try: 
-        chosen_id = request.form.get('event_food')
-        food_chosen = json.loads(chosen_id)
+    if plan_access(plan_id):
+        try: 
+            chosen_id = request.form.get('event_food')
+            food_chosen = json.loads(chosen_id)
 
 
-        # Get current plan and update with yelp listing details
-        current_plan = Plan.query.get(plan_id)
+            # Get current plan and update with yelp listing details
+            current_plan = Plan.query.get(plan_id)
 
-        current_plan.food_name = food_chosen['name']
-        current_plan.food_address = food_chosen['location']['address1']
-        current_plan.food_city = food_chosen['location']['city']
-        current_plan.food_state = food_chosen['location']['state']
-        current_plan.food_zipcode = food_chosen['location']['zip_code']
-        current_plan.food_longitude = food_chosen['coordinates']['longitude']
-        current_plan.food_latitude = food_chosen['coordinates']['latitude']
+            current_plan.food_name = food_chosen['name']
+            current_plan.food_address = food_chosen['location']['address1']
+            current_plan.food_city = food_chosen['location']['city']
+            current_plan.food_state = food_chosen['location']['state']
+            current_plan.food_zipcode = food_chosen['location']['zip_code']
+            current_plan.food_longitude = food_chosen['coordinates']['longitude']
+            current_plan.food_latitude = food_chosen['coordinates']['latitude']
 
-        db.session.commit()
+            db.session.commit()
 
-        return redirect('/add-friends/'+str(plan_id))
+            return redirect('/add-friends/'+str(plan_id))
 
-    except:
-        flash("Something went wrong. Please try again later.")
+        except:
+            flash("Something went wrong. Please try again later.")
+            return redirect('/profile')
+    else:
+        flash("You don't have edit access to this plan")
         return redirect('/profile')
 
 
@@ -473,87 +491,110 @@ def add_plan_restaurant(plan_id):
 @login_required
 def add_friends(plan_id):
     """ Add users friends to plan """
-    plan = Plan.query.get(plan_id)
+    if plan_access(plan_id):
+        plan = Plan.query.get(plan_id)
 
-    # If user got re-directed here through editing restaurant, take back to profile
-    if plan.invitees:
-        return redirect('/profile')
+        # If user got re-directed here through editing restaurant, take back to profile
+        if plan.invitees:
+            return redirect('/profile')
 
+        else:
+            return render_template("add_friends.html", plan=plan)
     else:
-        return render_template("add_friends.html", plan=plan)
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
 
 
 @app.route('/add-more-friends/<plan_id>')
 @login_required
 def add_more_friends(plan_id):
     """ Add more users friends to plan through 'add friends' button """
-    plan = Plan.query.get(plan_id)
+    if plan_access(plan_id):  
+        plan = Plan.query.get(plan_id)
+        return render_template("add_friends.html", plan=plan)
 
-    return render_template("add_friends.html", plan=plan)
+    else:
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
+
 
 @app.route('/add-friends/<plan_id>', methods=['POST'])
 @login_required
 def add_invitees(plan_id):
     """ Add users friends to plan """
-    current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
+    if plan_access(plan_id): 
+        current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
 
-    # Check if user inputted any friends
-    added_friends = False
+        # Check if user inputted any friends
+        added_friends = False
 
-    for friend in range(12):
-        if request.form.get('fname'+str(friend)):
-            added_friends = True
-            fname = request.form.get('fname'+str(friend))
-            lname = request.form.get('lname'+str(friend))
-            email = request.form.get('email'+str(friend))
-            phone = request.form.get('phone'+str(friend))
-            new_invitee = Invitee(plan_id=plan_id, user_id=current_user_id, 
-                                first_name=fname, last_name=lname, email=email,
-                                phone=phone)
-            db.session.add(new_invitee)
+        for friend in range(12):
+            if request.form.get('fname'+str(friend)):
+                added_friends = True
+                fname = request.form.get('fname'+str(friend))
+                lname = request.form.get('lname'+str(friend))
+                email = request.form.get('email'+str(friend))
+                phone = request.form.get('phone'+str(friend))
+                new_invitee = Invitee(plan_id=plan_id, user_id=current_user_id, 
+                                    first_name=fname, last_name=lname, email=email,
+                                    phone=phone)
+                db.session.add(new_invitee)
 
-            # E-mail user notifying of being added to plan
-            send_email(plan_id=plan_id, invitee_email=email, invitee_first_name=fname, invitee_last_name=lname)
-            flash("Email invite sent to {}".format(invitee_email))
+                # E-mail user notifying of being added to plan
+                send_email(plan_id=plan_id, invitee_email=email, invitee_first_name=fname, invitee_last_name=lname)
+                flash("Email invite sent to {}".format(invitee_email))
 
-            # Check if invitee has an account and add plan to their userplan
-            invitee_user = User.query.filter_by(email=email).first()
+                # Check if invitee has an account and add plan to their userplan
+                invitee_user = User.query.filter_by(email=email).first()
 
-            if invitee_user:
-                new_user_plan = UserPlan(plan_id=plan_id, user_id=invitee_user.user_id)
-                db.session.add(new_user_plan)
-            
-            db.session.commit()
+                if invitee_user:
+                    new_user_plan = UserPlan(plan_id=plan_id, user_id=invitee_user.user_id)
+                    db.session.add(new_user_plan)
+                
+                db.session.commit()
 
-    return redirect ('/profile')
+        return redirect ('/profile')
+
+    else:
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
+
 
 @app.route('/delete-plan/<plan_id>')
 @login_required
 def delete_plan_ask(plan_id):
     """ Double check that a user means to delete a plan record """
-    plan = Plan.query.get(plan_id)
+    if plan_access(plan_id): 
+        plan = Plan.query.get(plan_id)
+        return render_template("delete_plan.html", plan=plan)
 
-    return render_template("delete_plan.html", plan=plan)
+    else:
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
 
 
 @app.route('/delete-plan/<plan_id>', methods=['POST'])
 @login_required
 def delete_plan_forever(plan_id):
     """ Double check that a user means to delete a plan record """
-    plan = Plan.query.get(plan_id)
+    if plan_access(plan_id): 
+        plan = Plan.query.get(plan_id)
 
-    db.session.delete(plan)
-    db.session.commit()
+        db.session.delete(plan)
+        db.session.commit()
 
-    flash(plan.plan_name + " Plan has been deleted")
+        flash(plan.plan_name + " Plan has been deleted")
 
-    return redirect('/profile')
+        return redirect('/profile')
+    else:
+        flash("You don't have edit access to this plan")
+        return redirect('/profile')
 
 
 @app.route('/decline-plan/<plan_id>', methods=['POST'])
 @login_required
 def decline_plan(plan_id):
-
+    """ Allows a user to delete a plan from their own profile but not the overall plan """
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
 
     userplan_decline = UserPlan.query.filter(UserPlan.plan_id == plan_id and UserPlan.user_id == current_user_id).all()
