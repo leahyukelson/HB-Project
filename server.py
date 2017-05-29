@@ -184,6 +184,7 @@ def create_new_user():
 def logout():
     """Logs out user"""
     del session['current_user']
+    del session['chart_data']
     flash("You are now logged out.")
     return redirect('/login-form')
 
@@ -550,7 +551,7 @@ def add_invitees(plan_id):
 
                 # E-mail user notifying of being added to plan
                 send_email(plan_id=plan_id, invitee_email=email, invitee_first_name=fname, invitee_last_name=lname)
-                flash("Email invite sent to {}".format(invitee_email))
+                flash("Email invite sent to {}".format(email))
 
                 # Check if invitee has an account and add plan to their userplan
                 invitee_user = User.query.filter_by(email=email).first()
@@ -613,6 +614,26 @@ def decline_plan(plan_id):
     db.session.commit()
 
     return redirect('/profile')
+
+@app.route('/event-frequency.json')
+@login_required
+def generate_chart_data():
+    data_dict = {"datasets": [
+                                {
+                                    "label": "Events per Month",
+                                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
+                                }],
+                            "labels": ['January', 'February', 'March', 'April', 'May', 
+                                        'June', 'July', 'August', 'September',
+                                        'October', 'November', 'December'] }
+
+    current_user = User.query.filter_by(email=session['current_user']).first()
+    plans = current_user.plans
+
+    for plan in plans:
+        data_dict['datasets'][0]['data'][int(plan.event_time.month)-1] += 1
+
+    return jsonify(data_dict)
 
 
 if __name__ == "__main__":

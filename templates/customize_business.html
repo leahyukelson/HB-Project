@@ -43,10 +43,10 @@
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Sort By:
       <span class="caret"></span></button>
       <ul class="dropdown-menu">
-        <li><a href="" id="sortpricelow">Price: Low to High</a></li>
-        <li><a href="" id="sortpricehigh">Price: High to Low</a></li>
-        <li><a href="" id="sortrating">Yelp Rating</a></li>
-        <li><a href="" id="sortdistance">Distance</a></li>
+        <li><a id="sortpricelow">Price: Low to High</a></li>
+        <li><a id="sortpricehigh">Price: High to Low</a></li>
+        <li><a id="sortrating">Yelp Rating</a></li>
+        <li><a id="sortdistance">Distance</a></li>
       </ul>
       </div>
 <h4>Choose one:</h4>
@@ -83,6 +83,60 @@
 var all_businesses;
 var prevPage = 1;
 var limit = 50;
+
+
+function busQuickSort(sort_option, origBusiness){
+  if (origBusiness.length <= 1){
+    return origBusiness;
+  } else {
+
+    var left = [];
+    var right = [];
+    var newArray = [];
+    var pivot = origBusiness.pop();
+    var length = origBusiness.length;
+
+    for (var i = 0; i < length; i++){
+      if (origBusiness[i][sort_option] <= pivot[sort_option]){
+        left.push(origBusiness[i]);
+      } else {
+        right.push(origBusiness[i]);
+      }
+    }
+
+    return newArray.concat(busQuickSort(sort_option, left), pivot, busQuickSort(sort_option, right));
+  }
+}
+
+function sortBusiness(sort_option){
+  // Sorts restaurants by the option chosen by the user
+  var sorted_options;
+  if (sort_option == "low_price") {
+    sorted_options = busQuickSort("price", all_businesses);
+
+    all_businesses = sorted_options;
+    showBusinessesOptions(1);
+  }
+  else if (sort_option == "high_price") {
+    sorted_options = busQuickSort("price", all_businesses);
+
+    all_businesses = sorted_options.reverse();
+    showBusinessesOptions(1);
+  }
+  else if (sort_option == "rating"){
+    sorted_options = busQuickSort("rating", all_businesses);
+
+    all_businesses = sorted_options.reverse();
+    showBusinessesOptions(1);
+  }
+  else {
+    sorted_options = busQuickSort("distance", all_businesses);
+
+    all_businesses = sorted_options;
+    showBusinessesOptions(1);
+  }
+
+}
 
 function showChooseBusinesses(yelp_json){
 // Fill in form from Yelp API json
@@ -148,11 +202,13 @@ function businessOptions(evt){
   $.post('/yelp.json', user_prefs, showChooseBusinesses);
 }
 
+// Button Event Listeners
 $('#customize_restaurant_form').on('submit', businessOptions);
-
-$(".buspg").on("click", function () {
-                showBusinessesOptions(this.value);
-                });
+$(".buspg").on("click", function () {showBusinessesOptions(this.value);});
+$("#sortpricelow").on("click", function() {sortBusiness('low_price');});
+$("#sortpricehigh").on("click", function() {sortBusiness('high_price');});
+$("#sortrating").on("click", function() {sortBusiness('rating');});
+$("#sortdistance").on("click", function() {sortBusiness('distance');});
 
 </script>
 
