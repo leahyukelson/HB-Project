@@ -184,7 +184,6 @@ def create_new_user():
 def logout():
     """Logs out user"""
     del session['current_user']
-    del session['chart_data']
     flash("You are now logged out.")
     return redirect('/login-form')
 

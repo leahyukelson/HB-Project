@@ -5,7 +5,12 @@
 
   .options {
     display: inline-block;
-  }
+}
+    
+    .google-map {
+      vertical-align: right;
+      height: 100px;
+    }
 
 
 </style>
@@ -30,18 +35,22 @@
 <div class="tab-content">
   <div id="upcoming" class="tab-pane fade in active">
   {% for plan in upcoming %}
+  <div class="upcoming-plan">
       <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
       {% if (plan.food_name) and (plan.food_time) %}
       <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
-        <p>{{plan.food_address}}</p>
-        <p>{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>  
+        <p class="bus-address">{{plan.food_address}}</p>
+        <p class="bus-address2">{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>
+        <p class="plan-id" hidden>{{plan.plan_id}}</p>
+        <p class="food-longitude" hidden>{{plan.food_longitude}}</p>
+        <p class="food-latitude" hidden>{{plan.food_latitude}}</p>  
       {% endif %}
       <h4>{{plan.event_time.strftime('%-I:%M %p') }}: {{plan.event_name}}</h4>
         {% if plan.event_location %}
         <p>{{plan.event_location}}</p>
         {% endif %}
-        <p>{{plan.event_address}}</p>
-        <p>{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
+        <p class="plan-address">{{plan.event_address}}</p>
+        <p class="plan-address2">{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
       {% if plan.invitees %}
       <h4>Friends Invited:</h4>
       {% endif %}
@@ -68,6 +77,8 @@
     <a href="/delete-plan/{{plan.plan_id}}" class="btn btn-danger">Delete Plan</a>
       {% endif %}
     <button class="btn btn-warning decline_plan_btn" value="/decline-plan/{{plan.plan_id}}">Decline Plan</button>
+    <div class="google-map" id="map{{plan.plan_id}}"></div>
+    </div>
   {% endfor %}
   </div>
 
@@ -100,6 +111,9 @@
 {% else %}
 <a href="/new-plan">You have no plans yet. Create one now!</a>
 {% endif %}
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.js"></script>
 
 <script>
 "use strict";
@@ -141,6 +155,32 @@ $(document).ready(function(){
   });
 });
 
+function initMap(){
+   $(".upcoming-plan").each(function() {
+      console.log($(this));
+      var plan_id = $(this).children(".plan-id").html();
+      var food_latitude = parseFloat($(this).children(".food-latitude").html());
+      var food_longitude = parseFloat($(this).children(".food-longitude").html());
+      var ltLng = {lat: food_latitude, lng: food_longitude};
+      console.log(plan_id);
+      console.log(food_latitude);
+      var map = new google.maps.Map(document.getElementById("map"+plan_id), {
+        zoom: 5,
+        center: ltLng
+      });
+    }
+      );
+}
+
+
+
 </script>
+<script type="text/javascript">
+  function initialize(){
+  $(document).ready(initMap());
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4vEycjJ1g4LUHzhfZfi0qAfMlWt3jRX8&libraries=places&callback=initialize"
+        async defer></script>
 
 {% endblock %}
