@@ -2,18 +2,43 @@
 {% block content %}
 
 {% if 'current_user' in session %}
-    <h2>New Plan</h2>
-    <form id="new_user_plan" action="/new-plan" method="POST"> 
-      Plan name:<input type="text" id="plan_name" name="plan_name"><br>
-      Event name:<input type="text" id="event_name" name="event_name" required><br>
-      Event Date:<input type="date" id="event_date" name="event_date" required><br>
-      Event Time:<input type="time" id="event_time" name="event_time" required><br>
-      Event Location Name:<input type="text" id="autocomplete" name="location"><br>
-      Event Address:<input type="text" id="street_number" name="number"><input type="text" id="route" name="street"><br>
-      Event City:<input type="text" id="locality" name="city" required>
-      Event State:<input type="text" id="administrative_area_level_1" name="state" required>
-      Event Zip:<input type="text" id="postal_code" name="zipcode" required><br>
-      <input type="submit" id="submit_button">
+    <h2>Create a New Plan</h2>
+    <form id="new_user_plan" class="form-horizontal" action="/new-plan" method="POST">
+      <div class="form-group"> 
+        <label for="plan_name">Plan name</label>
+        <input type="text" class="form-control" id="plan_name" name="plan_name">
+      </div>
+      <div class="form-group">
+        <label for="event_name">Event name</label>
+        <input type="text" class="form-control" id="event_name" name="event_name" required>
+      </div>
+      <div class="form-group">
+        <label for="event_date">Event Date</label>
+        <input type="date" class="form-control" id="event_date" name="event_date" required>
+      </div>
+      <div class="form-group">
+        <label for="event_time">Event Time:</label>
+        <input type="time" class="form-control" id="event_time" name="event_time" required>
+      </div>
+      <div class="form-group">
+        <label for="locaton">Location Name</label>
+        <input type="text" class="form-control" id="autocomplete" name="location" size="60">
+      </div>
+      <div class="form-group">
+        <label for="event_address">Address</label>
+        <input type="text" id="street_number" name="number"><input type="text" id="route" name="street">
+      </div>
+      <div class="form-group">
+        <label for="locality">City</label>
+        <input type="text" id="locality" name="city" required>
+        <label for="state">State</label>
+        <input type="text" id="administrative_area_level_1" name="state" required>
+        <label for="postal_code">Zipcode</label>
+        <input type="text" id="postal_code" name="zipcode" required>
+      </div>
+      <input type="hidden" id="event_long" name="event_long"></p>
+      <input type="hidden" id="event_lat" name="event_lat"></p>
+      <button type="submit" class="btn btn-default" id="submit_button">Submit</button>
     </form>
 
 {% else %}
@@ -49,6 +74,11 @@ function fillInAddress() {
     document.getElementById(component).disabled = false;
   }
 
+  document.getElementById('event_long').value = '';
+  document.getElementById('event_long').disabled = false;
+  document.getElementById('event_lat').value = '';
+  document.getElementById('event_lat').disabled = false;
+
   // Get each component of the address from the place details
   // and fill the corresponding field on the form.
   for (var i = 0; i < place.address_components.length; i++) {
@@ -58,6 +88,10 @@ function fillInAddress() {
       document.getElementById(addressType).value = val;
     }
   }
+  var place_latitude = place.geometry.location.lat();
+  var place_longitude = place.geometry.location.lng();
+  $("#event_long").val(place_longitude);
+  $("#event_lat").val(place_latitude);
 }
 
 // Bias the autocomplete object to the user's geographical location,

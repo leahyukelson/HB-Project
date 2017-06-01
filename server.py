@@ -271,14 +271,23 @@ def add_new_plan():
     new_plan_state = request.form.get('state')
     new_plan_city = request.form.get('city')
     new_plan_zipcode = request.form.get('zipcode')
+    new_plan_lat = request.form.get('event_lat')
+    new_plan_long = request.form.get('event_long')
 
     # Strip off extra address details added by Google Autofill
     new_plan_location = new_plan_location.split(",")[0]
 
     new_plan_address = new_plan_number + " " + new_plan_street
+
     # If user chooses to not name plan right away - defaults to the event name
     if new_plan_name == "":
         new_plan_name = new_event_name
+
+    print "NEW LONG", new_plan_long
+    print "NEW LAT", new_plan_lat
+    print type(new_plan_lat)
+    new_plan_long = float(new_plan_long)
+    new_plan_lat = float(new_plan_lat)
 
     current_user_id = User.query.filter_by(email=session['current_user']).first().user_id
 
@@ -287,7 +296,7 @@ def add_new_plan():
                     event_name=new_event_name, event_time=new_event_datetime, 
                     event_location=new_plan_location, event_address=new_plan_address, 
                     event_state=new_plan_state, event_city=new_plan_city, 
-                    event_zipcode=new_plan_zipcode)
+                    event_zipcode=new_plan_zipcode, event_longitude=new_plan_long, event_latitude=new_plan_lat)
     
     # Add plan to Plan database
     db.session.add(new_plan)
@@ -346,6 +355,8 @@ def edit_event_plan(plan_id):
         new_plan_state = request.form.get('state')
         new_plan_city = request.form.get('city')
         new_plan_zipcode = request.form.get('zipcode')
+        new_plan_lat = request.form.get('event_lat')
+        new_plan_long = request.form.get('event_long')
 
         # Strip off extra address details added by Google Autofill
         new_plan_location = new_plan_location.split(",")[0]
@@ -373,6 +384,8 @@ def edit_event_plan(plan_id):
         plan.event_state = new_plan_state
         plan.event_city = new_plan_city
         plan.event_zipcode = new_plan_zipcode
+        plan.event_longitude = float(new_plan_long)
+        plan.event_latitude = float(new_plan_lat)
 
         db.session.commit()
 

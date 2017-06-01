@@ -1,0 +1,32 @@
+// Overall Formatting
+html {
+    background-image:url("/static/food.png");
+    font-family: 'Playfair Display', serif;
+}
+
+// Profile
+.options {
+    display: inline-block;
+  }
+    
+.google-map {
+    height: 200px;
+    vertical-align: center;
+  }
+
+#past{
+    background: rgba(241, 245, 247, 0.65); /* translucent yellow */
+}
+
+.row {
+    background: rgba(241, 245, 247, 0.65); /* translucent yellow */
+}
+
+// Business choosing forms
+
+#entire-drop {
+    float: right;
+    margin: 50px;
+  }
+
+

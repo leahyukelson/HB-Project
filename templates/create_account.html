@@ -2,7 +2,7 @@
 {% block content %}
 
     <h2>Create Account</h2>
-    <form id="new_user_form" action="/create-account" method="POST"> 
+    <form id="new_user_form" class="form-horizontal" action="/create-account" method="POST">
       Email:<input type="email" id="email" name="email" default="email" required><br> 
       Password:<input type="password" id="password" name="password" default="password" required><br>
       First Name:<input type="text" id="first_name" name="first_name" required><br>
