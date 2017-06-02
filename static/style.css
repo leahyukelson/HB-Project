@@ -1,28 +1,39 @@
-// Overall Formatting
+/* Overall Formatting */
 html {
-    background-image:url("/static/food.png");
     font-family: 'Playfair Display', serif;
+    background: url('/static/daimond.png');
 }
 
-// Profile
+/* Profile */
 .options {
     display: inline-block;
   }
     
 .google-map {
-    height: 200px;
+    height: 300px;
+    padding: 100px;
     vertical-align: center;
+    margin-left:auto;
+    margin-right:auto;
   }
 
-#past{
-    background: rgba(241, 245, 247, 0.65); /* translucent yellow */
+#past {
+    background: rgba(241, 245, 247, 0.65);
 }
 
 .row {
-    background: rgba(241, 245, 247, 0.65); /* translucent yellow */
+    background: rgba(241, 245, 247, 0.65);
 }
 
-// Business choosing forms
+.boot-tab{
+    background: rgb(1, 1, 59);
+    color: rgb(250, 250, 250);
+}
+
+.chart-button{
+    background-color: rgb(218, 165, 32);
+}
+/* Business choosing forms */
 
 #entire-drop {
     float: right;

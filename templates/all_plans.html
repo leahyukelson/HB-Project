@@ -10,14 +10,13 @@
   <button type="button" id="chart-btn" class="btn btn-info" data-toggle="collapse" data-target="#event-jchart">Collapse Chart</button>
 </div>
 <div id="event-jchart" class="event-chart collapse in">
-  <canvas id="lineChart" width="40" height="20"></canvas>
+  <canvas id="lineChart" width="60" height="30"></canvas>
   <div id="lineLegend" class="chart-legend"></div>
       </div>
 
-<h2>Plans</h2>
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#upcoming">Upcoming</a></li>
-  <li><a data-toggle="tab" href="#past">Past</a></li>
+  <li class="active boot-tab"><a data-toggle="tab" href="#upcoming">Upcoming Plans</a></li>
+  <li><a class="boot-tab" data-toggle="tab" href="#past">Past Plans</a></li>
 </ul>
 
 <div class="tab-content">
@@ -72,7 +71,7 @@
       {% endif %}
     <button class="btn btn-warning decline_plan_btn" value="/decline-plan/{{plan.plan_id}}">Decline Plan</button>
     </div>
-    <div class="map-col col-xs-6">
+    <div class="map-col col-xs-6 aligncenter">
     <div class="google-map" id="map{{plan.plan_id}}"></div>
     </div>
     <div class="aligncenter" style="width:800px;height:3px;border-top:2px dotted #000000;border-bottom:2px dotted #000000;font-size:0;">-</div> 
@@ -103,6 +102,7 @@
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
       {% endif %}
       {% endfor %}
+  <div class="aligncenter" style="width:800px;height:3px;border-top:2px dotted #000000;border-bottom:2px dotted #000000;font-size:0;">-</div>
   {% endfor %}
   </div>
 </div>

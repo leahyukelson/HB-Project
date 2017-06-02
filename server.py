@@ -633,7 +633,8 @@ def generate_chart_data():
     data_dict = {"datasets": [
                                 {
                                     "label": "Events per Month",
-                                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
+                                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    "backgroundColor": 'rgba(1, 1, 59, 0.8)' 
                                 }],
                             "labels": ['January', 'February', 'March', 'April', 'May', 
                                         'June', 'July', 'August', 'September',
