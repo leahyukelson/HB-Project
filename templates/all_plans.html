@@ -6,17 +6,12 @@
 {% if (upcoming) or (past) %}
 <a href="/new-plan" class="btn btn-primary">Create New</a>
 <br><br>
-<div class="chartCollapseContainer">
-  <button type="button" id="chart-btn" class="btn btn-info" data-toggle="collapse" data-target="#event-jchart">Collapse Chart</button>
-</div>
-<div id="event-jchart" class="event-chart collapse in">
-  <canvas id="lineChart" width="60" height="30"></canvas>
-  <div id="lineLegend" class="chart-legend"></div>
-      </div>
+
 
 <ul class="nav nav-tabs">
   <li class="active boot-tab"><a data-toggle="tab" href="#upcoming">Upcoming Plans</a></li>
   <li><a class="boot-tab" data-toggle="tab" href="#past">Past Plans</a></li>
+  <li><a class="boot-tab" data-toggle="tab" href="#analytics">Analytics</a></li>
 </ul>
 
 <div class="tab-content">
@@ -25,7 +20,7 @@
   {% for plan in upcoming %}
   <div id="plan-info-and-map" class="row">
   <div class="upcoming-plan col-xs-6">
-      <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
+      <h3>{{ plan.event_time.strftime('%B %-d, %Y')}} {{plan.plan_name }}</h3>
       {% if (plan.food_name) and (plan.food_time) %}
       <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
         <p class="bus-address">{{plan.food_address}}</p>
@@ -105,6 +100,16 @@
   <div class="aligncenter" style="width:800px;height:3px;border-top:2px dotted #000000;border-bottom:2px dotted #000000;font-size:0;">-</div>
   {% endfor %}
   </div>
+
+  <div id="analytics" class="tab-pane fade">
+    <div id="event-jchart" class="event-chart collapse in">
+      <canvas id="lineChart" width="60" height="30"></canvas>
+      <div id="lineLegend" class="chart-legend"></div>
+    </div>
+    <div class="chartCollapseContainer">
+      <button type="button" id="chart-btn" class="btn btn-info" data-toggle="collapse" data-target="#event-jchart">Collapse Chart</button>
+    </div>
+  </div>
 </div>
 {% else %}
 <a href="/new-plan">You have no plans yet. Create one now!</a>
@@ -167,7 +172,7 @@ function initMap(){
       var event_image = '/static/calendar.png'
       var food_image = '/static/fork.png'
       var map = new google.maps.Map(document.getElementById("map"+plan_id), {
-        zoom: 13,
+        zoom: 14,
         center: eventltLng,
         gestureHandling: 'cooperative',
         mapTypeControl: false,

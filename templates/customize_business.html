@@ -35,36 +35,41 @@
   <button type="submit" class="btn btn-default" id="submit_button">Submit</button>
 </form>
 
-<div id="restaurant_options" hidden>
-      <div id="entire-drop" class="dropdown options">
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Sort By:
-      <span class="caret"></span></button>
-      <ul class="dropdown-menu">
-        <li><a id="sortpricelow">Price: Low to High</a></li>
-        <li><a id="sortpricehigh">Price: High to Low</a></li>
-        <li><a id="sortrating">Yelp Rating</a></li>
-        <li><a id="sortdistance">Distance</a></li>
-      </ul>
-</div>
-
-<h4>Choose one:</h4>
-<p>Highlighted businesses are restaurants or bars that have appeared in your Night Out plans</p>
-<form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST">
-  <div id="business_buttons"></div>
-    <ul class="pagination">
-      <li value="1" id="buspg1" class="active buspg"><a>1</a></li>
-      <li value="2" id="buspg2" class="buspg"><a>2</a></li>
-      <li value="3" id="buspg3" class="buspg"><a>3</a></li>
-      <li value="4" id="buspg4" class="buspg"><a>4</a></li>
-      <li value="5" id="buspg5" class="buspg"><a>5</a></li>
-      <li value="6" id="buspg6" class="buspg"><a>6</a></li>
-      <li value="7" id="buspg7" class="buspg"><a>7</a></li>
-      <li value="8" id="buspg8" class="buspg"><a>8</a></li>
-      <li value="9" id="buspg9" class="buspg"><a>9</a></li>
-      <li value="10" id="buspg10" class="buspg"><a>10</a></li>
+<div id="restaurant_options" class="container" hidden>
+  <div id="choosing-business-options" class="row">
+    <div id="helpful-info-text" class="col-xs-9">
+      <h4>Choose one:</h4>
+      <p>Highlighted businesses are restaurants or bars that have appeared in your Night Out plans</p>
+    </div>
+  <div id="entire-drop" class="dropdown options col-xs-3">
+    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Sort By:
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu">
+      <li><a id="sortpricelow">Price: Low to High</a></li>
+      <li><a id="sortpricehigh">Price: High to Low</a></li>
+      <li><a id="sortrating">Yelp Rating</a></li>
+      <li><a id="sortdistance">Distance</a></li>
     </ul>
-      <input type="submit" id="submit_button">
-</form>
+  </div>
+  </div>
+  <form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST">
+    <div id="business_buttons"></div>
+    <div id="pagination-buttons">
+      <ul class="pagination">
+        <li value="1" id="buspg1" class="active buspg"><a>1</a></li>
+        <li value="2" id="buspg2" class="buspg"><a>2</a></li>
+        <li value="3" id="buspg3" class="buspg"><a>3</a></li>
+        <li value="4" id="buspg4" class="buspg"><a>4</a></li>
+        <li value="5" id="buspg5" class="buspg"><a>5</a></li>
+        <li value="6" id="buspg6" class="buspg"><a>6</a></li>
+        <li value="7" id="buspg7" class="buspg"><a>7</a></li>
+        <li value="8" id="buspg8" class="buspg"><a>8</a></li>
+        <li value="9" id="buspg9" class="buspg"><a>9</a></li>
+        <li value="10" id="buspg10" class="buspg"><a>10</a></li>
+    </div>
+      <button type="submit" class="btn btn-default business-submit" id="submit_button">Submit</button>
+      </ul>
+  </form>
 </div>
 
 

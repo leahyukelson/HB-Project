@@ -1,7 +1,6 @@
 /* Overall Formatting */
 html {
     font-family: 'Playfair Display', serif;
-    background: url('/static/daimond.png');
 }
 
 /* Profile */
@@ -36,8 +35,10 @@ html {
 /* Business choosing forms */
 
 #entire-drop {
-    float: right;
-    margin: 50px;
+    margin-top: auto;
   }
 
+#pagination-buttons {
+    text-align: center;
+}
 

@@ -3,20 +3,29 @@
 
 {% if 'current_user' in session %}
     {% if plan.invitees %}
-    <h2>Add up to {{12 - plan.invitees|length}} more friends</h2>
+    <h2 class="h2">Add up to {{12 - plan.invitees|length}} more friends</h2>
     {% else %}
-    <h2>Add up to 12 friends</h2>
+    <h2 class="h2">Add up to 12 friends</h2>
     {% endif %}
-    <a href="/profile" class="btn btn-primary">Add friends later</a>
-    <form id="add_friends_plan" action="/add-friends/{{plan.plan_id }}" method="POST">
+    <form id="add_friends_plan" class="form-inline" action="/add-friends/{{plan.plan_id }}" method="POST">
     {% for friend in range(12- plan.invitees|length) %}
-    <p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</p> 
-      First Name:<input type="text" name={{ "fname"+friend|string }}>
-      Last Name:<input type="text" name={{ "lname"+friend|string }}><br>
-      E-mail:<input type="email" name={{ "email"+friend|string }}>
-      Phone Number:<input type="tel" name={{ "phone"+friend|string }}><br>
+      <div class="form-group">
+        <label for="fname">First Name</label>
+        <input type="text" name={{ "fname"+friend|string }}>
+      </div>
+      <div class="form-group">
+        <label for="lname">Last Name</label>
+        <input type="text" name={{ "lname"+friend|string }}>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label> 
+        <input type="email" name={{ "email"+friend|string }}>
+      </div>
     {% endfor %}
-      <input type="submit" id="submit_button">
+    <div>
+      <button type="submit" class="btn btn-default business-submit" id="submit_button">Submit</button>
+      <a href="/profile" class="btn btn-primary">Add friends later</a>
+    </div>
     </form>
 
 
