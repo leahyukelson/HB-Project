@@ -1,6 +1,33 @@
 /* Overall Formatting */
 html {
     font-family: 'Playfair Display', serif;
+    font-size: 20px;
+}
+
+/* Sign In & Create Account pages */
+#login-div {
+    background: #FFFF99;
+    padding: 5%;
+    border-radius: 4px;
+    box-shadow: 6px 6px 10px 0px rgba(138,130,138,.5);
+    margin: 8%;
+    height: 40%;
+}
+
+#create-account-div {
+    background: #FFFF99;
+    padding: 5%;
+    border-radius: 4px;
+    box-shadow: 6px 6px 10px 0px rgba(138,130,138,.5);
+    margin: 8%;
+    height: 40%;
+}
+
+.in-heading {
+    font-family: 'Roboto Condensed', sans-serif;
+}
+#create-account-submit {
+    text-align: center;
 }
 
 /* Profile */

@@ -45,8 +45,7 @@ class NewUserTests(unittest.TestCase):
                               data={'email': 'rachel@gmail.com',
                                     'password': '123',
                                     'first_name': 'Rachel',
-                                    'last_name': 'Ray',
-                                    'zip_code': '12345'},
+                                    'last_name': 'Ray'},
                               follow_redirects=True)
         self.assertIn("now registered and logged in", result.data)
         self.assertIn("Create one now!", result.data)
@@ -66,8 +65,7 @@ class NewUserTests(unittest.TestCase):
                               data={'email': 'rachel@gmail.com',
                                     'password': '123',
                                     'first_name': 'Rachel',
-                                    'last_name': 'Ray',
-                                    'zip_code': '12345'},
+                                    'last_name': 'Ray'},
                               follow_redirects=True)
 
         # User has profile with no plans, and a link to create plans
@@ -81,8 +79,7 @@ class NewUserTests(unittest.TestCase):
                               data={'email': 'rachel@gmail.com',
                                     'password': '123',
                                     'first_name': 'Rachel',
-                                    'last_name': 'Ray',
-                                    'zip_code': '12345'},
+                                    'last_name': 'Ray'},
                               follow_redirects=True)
 
         # User clicks log out
@@ -97,8 +94,7 @@ class NewUserTests(unittest.TestCase):
                               data={'email': 'rachel@gmail.com',
                                     'password': '123',
                                     'first_name': 'Rachel',
-                                    'last_name': 'Ray',
-                                    'zip_code': '12345'},
+                                    'last_name': 'Ray'},
                               follow_redirects=True)
 
         # User clicks log out
@@ -115,7 +111,7 @@ class NewUserTests(unittest.TestCase):
     def test_no_user_profile(self):
         """ Test that profile page redirects to log-in for a user not logged in """
         result = self.client.get('/profile', follow_redirects=True)
-        self.assertIn("Login", result.data, 'Page did not redirect')
+        self.assertIn("Log In", result.data, 'Page did not redirect')
         self.assertNotIn("Plans", result.data, 'Page did not redirect')
 
 
@@ -151,12 +147,11 @@ class NightPlanTests(unittest.TestCase):
                               data={'email': 'rachel@gmail.com',
                                     'password': '123',
                                     'first_name': 'Rachel',
-                                    'last_name': 'Ray',
-                                    'zip_code': '12345'},
+                                    'last_name': 'Ray'},
                               follow_redirects=True)
 
         self.assertIn("User email already exists", result.data, "Message did not flash")
-        self.assertIn("Login", result.data, "User was signed in")
+        self.assertIn("Log In", result.data, "User was signed in")
         self.assertNotIn("now registered and logged in", result.data, "Allowed duplicate account creation")
 
     def test_log_in(self):
@@ -199,8 +194,7 @@ class NightPlanTests(unittest.TestCase):
                               data={'email': 'bobby@gmail.com',
                                     'password': 'bbobb',
                                     'first_name': 'Bob',
-                                    'last_name': 'Bobby',
-                                    'zip_code': '12345'},
+                                    'last_name': 'Bobby'},
                               follow_redirects=True)
 
         # User should see previously invited plans on profile page
@@ -232,7 +226,7 @@ class NightPlanTests(unittest.TestCase):
         result = self.client.get('/profile')
         self.assertIn("Plans", result.data)
         self.assertIn("Concert", result.data)
-        self.assertIn("10/03/18", result.data)
+        self.assertIn("October 3, 2018", result.data)
 
     def test_event_creation_form(self):
         """ Test event create form """
@@ -265,7 +259,9 @@ class NightPlanTests(unittest.TestCase):
                                     'street' : 'Grove Street',
                                     'state' : 'CA',
                                     'city' : 'San Francisco',
-                                    'zipcode' : '94102'},
+                                    'zipcode' : '94102',
+                                    'event_lat': '130',
+                                    'event_long': '-50'},
                               follow_redirects=True)
 
         # Re-direct to choose-restaurant form
@@ -308,7 +304,9 @@ class NightPlanTests(unittest.TestCase):
                                     'street' : 'Grove Street',
                                     'state' : 'CA',
                                     'city' : 'San Francisco',
-                                    'zipcode' : '94102'},
+                                    'zipcode' : '94102',
+                                    'event_lat': '130',
+                                    'event_long': '-50'},
                               follow_redirects=True)
 
         # Re-direct to choose-restaurant form
@@ -355,8 +353,8 @@ class NightPlanTests(unittest.TestCase):
 
         # Path to choose to edit an already-existing plan
         result = self.client.get("/edit-plan/2")
-        self.assertIn("Event name:", result.data)
-        self.assertIn("Event Location Name:", result.data)
+        self.assertIn("Event name", result.data)
+        self.assertIn("Location", result.data)
 
     def test_edit_plan(self):
         """ Test editing a plan's details, not address """
@@ -376,7 +374,9 @@ class NightPlanTests(unittest.TestCase):
                                     'street' : 'Gayley Rd.',
                                     'state' : 'CA',
                                     'city' : 'Berkeley',
-                                    'zipcode' : '94720'},
+                                    'zipcode' : '94720',
+                                    'event_lat': '130',
+                                    'event_long': '-50'},
                               follow_redirects=True)
 
         # Check that page redirected to profile since location is unchanged
@@ -408,7 +408,9 @@ class NightPlanTests(unittest.TestCase):
                                     'street' : 'Grove Street',
                                     'state' : 'CA',
                                     'city' : 'San Francisco',
-                                    'zipcode' : '94102'},
+                                    'zipcode' : '94102',
+                                    'event_lat': '130',
+                                    'event_long': '-50'},
                               follow_redirects=True)
 
         # Page should re-direct to choose new business with new location at center
@@ -429,7 +431,7 @@ class NightPlanTests(unittest.TestCase):
                 session['current_user'] = "sally@gmail.com"
 
         result = self.client.get('/edit-plan/16', follow_redirects=True)
-        self.assertIn(">You don&#39;t have edit access to this plan", result.data)
+        self.assertIn("You don&#39;t have edit access to this plan", result.data)
         self.assertIn("Plans", result.data)
         self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
         self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")
@@ -443,7 +445,7 @@ class NightPlanTests(unittest.TestCase):
                 session['current_user'] = "sally@gmail.com"
 
         result = self.client.get('/edit-plan/3', follow_redirects=True)
-        self.assertIn(">You don&#39;t have edit access to this plan", result.data)
+        self.assertIn("You don&#39;t have edit access to this plan", result.data)
         self.assertIn("Plans", result.data)
         self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
         self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")

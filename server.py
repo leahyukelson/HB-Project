@@ -132,7 +132,7 @@ def create_account():
 def create_new_user():
     """ Checks user email is new and processes registration 
 
-    Adds plans that user was previously an invitee
+    Adds plans in which that user was previously an invitee
     """
     
     # Extract all data from account creation form
@@ -140,7 +140,6 @@ def create_new_user():
     user_password = request.form.get('password')
     user_first_name = request.form.get('first_name')
     user_last_name = request.form.get('last_name')
-    user_zip = request.form.get('zip_code')
 
     # Encode password
     hashed = bcrypt.hashpw(user_password.encode('utf8'), bcrypt.gensalt(9))
@@ -154,9 +153,7 @@ def create_new_user():
     # Create new user and log in
     else:
         new_user = User(email=user_email, password=hashed, 
-                        first_name=user_first_name, last_name=user_last_name, 
-                        zipcode=user_zip)
-
+                        first_name=user_first_name, last_name=user_last_name)
         # Add new user to the databased
         db.session.add(new_user)
 
@@ -234,6 +231,7 @@ def user_profile():
     past = []
     now = datetime.datetime.now()
 
+    # Distinguish between plans that are before and after now (based on datetime)
     for plan in plans:
         if plan.event_time >= now:
             upcoming.append(plan)
@@ -253,6 +251,7 @@ def user_profile():
 def new_plan():
     """ User creates a new plan """
     return render_template('add_plan.html')
+
 
 @app.route('/new-plan', methods=['POST'])
 @login_required
@@ -283,9 +282,6 @@ def add_new_plan():
     if new_plan_name == "":
         new_plan_name = new_event_name
 
-    print "NEW LONG", new_plan_long
-    print "NEW LAT", new_plan_lat
-    print type(new_plan_lat)
     new_plan_long = float(new_plan_long)
     new_plan_lat = float(new_plan_lat)
 
@@ -448,8 +444,6 @@ def choose_restaurant():
         for plan in plans:
             if plan.food_name:
                 prior_businesses.add(plan.food_name+str(plan.food_zipcode))
-
-        print prior_businesses
 
         # Loop through businesses and determine which user has selected in previous plans
         for business in businesses:
