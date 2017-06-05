@@ -2,7 +2,8 @@
 {% block content %}
 
 {% if 'current_user' in session %}
-    <h3 class="h3">Create a New Plan</h3>
+<div class="form">
+    <h3 class="text-center in-heading">Create a New Plan</h3>
     <form id="new_user_plan" class="form-horizontal" action="/new-plan" method="POST">
       <div class="form-group"> 
         <label for="plan_name">Plan name</label>
@@ -38,9 +39,9 @@
       </div>
       <input type="hidden" id="event_long" name="event_long"></p>
       <input type="hidden" id="event_lat" name="event_lat"></p>
-      <button type="submit" class="btn btn-default" id="submit_button">Submit</button>
+      <button type="submit" class="btn btn-default" id="submit_button">Next</button>
     </form>
-
+</div>
 {% else %}
     <a href="/login-form" class="btn btn-primary">Log In</a>
     <a href="/create-account" class="btn btn-primary">Create Account</a>

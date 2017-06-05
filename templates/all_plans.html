@@ -18,7 +18,7 @@
   <div id="upcoming" class="tab-pane fade in active">
   <div class="container">
   {% for plan in upcoming %}
-  <div id="plan-info-and-map" class="row">
+  <div class="plan-info-and-map row">
   <div class="upcoming-plan col-xs-6">
       <h3>{{ plan.event_time.strftime('%B %-d, %Y')}} {{plan.plan_name }}</h3>
       {% if (plan.food_name) and (plan.food_time) %}
@@ -69,7 +69,6 @@
     <div class="map-col col-xs-6 aligncenter">
     <div class="google-map" id="map{{plan.plan_id}}"></div>
     </div>
-    <div class="aligncenter" style="width:800px;height:3px;border-top:2px dotted #000000;border-bottom:2px dotted #000000;font-size:0;">-</div> 
   </div>
   {% endfor %}
   </div>
@@ -97,7 +96,6 @@
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
       {% endif %}
       {% endfor %}
-  <div class="aligncenter" style="width:800px;height:3px;border-top:2px dotted #000000;border-bottom:2px dotted #000000;font-size:0;">-</div>
   {% endfor %}
   </div>
 

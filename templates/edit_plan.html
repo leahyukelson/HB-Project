@@ -2,7 +2,8 @@
 {% block content %}
 
 {% if 'current_user' in session %}
-    <h2>Edit Existing Plan</h2>
+<div class="form">
+    <h2 class="text-center in-heading">Edit Existing Plan</h2>
     <form id="edit_user_plan" class="form-horizontal" action="/edit-plan/{{plan.plan_id}}" method="POST">
       <div class="form-group"> 
         <label for="plan_name">Plan name</label> 
@@ -41,7 +42,7 @@
       <input type="hidden" id="event_lat" name="event_lat"></p>
       <button type="submit" class="btn btn-default" id="submit_button">Submit</button>
     </form>
-
+</div>
 {% else %}
     <a href="/login-form" class="btn btn-primary">Log In</a>
     <a href="/create-account" class="btn btn-primary">Create Account</a>

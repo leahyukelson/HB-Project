@@ -33,7 +33,7 @@ def get_yelp_bearer_token():
 
     # OS environ for client ID would not be accepted on Yelp side
     data = urlencode({
-    'client_id': 's50ybEKVTcgO0rhu7bXKHA',
+    'client_id': os.environ['YELP_CLIENT_ID'],
     'client_secret': os.environ['YELP_CLIENT_SECRET'],
     'grant_type': 'client_credentials',
     })

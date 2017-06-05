@@ -3,39 +3,42 @@
 
 {% if 'current_user' in session %}
 
+  <form id="customize_restaurant_form" class="form-horizontal" action="dont_go_here">
+  <div class="form">
+    <label for="bar_or_rest">Meet at</label>
+    <select id="bar_or_rest" class="form-control" name="bar_or_restaurant">
+      <option value="bars">Bar</option>
+      <option value="restaurants">Restaurant</option>
+    </select>
+    <label for="time_before">Time before event</label>
+    <select id="time_before" class="form-control" name="time_before">
+      <option value="0.5">30 minutes</option>
+      <option value="1">1 hour</option>
+      <option value="1.5">1.5 hours</option>
+      <option value="2">2 hours</option>
+      <option value="2.5">2.5 hours</option>
+      <option value="3">3 hours</option>
+      <option value="3.5">3.5 hours</option>
+      <option value="4">4 hours</option>
+      <option value="4.5">4.5 hours</option>
+      <option value="5">5 hours</option>
+    </select>
+    <label for="distance">Distance from event</label>
+    <select id="distance" class="form-control" name="distance">
+      <option value="0.5">1/2 mile</option>
+      <option value="1">1 mile</option>
+      <option value="5">5 miles</option>
+      <option value="10">10 miles</option>
+    </select>
+    <br>
+    <input type="hidden" value='{{current_plan_id}}' id="plan_id">
+    <button type="submit" class="btn btn-default" id="submit_button">Submit</button>
+  </form>
+</div>
 
-<form id="customize_restaurant_form" class="form-horizontal" action="dont_go_here">
-  <label for="bar_or_rest">Meet at</label>
-  <select id="bar_or_rest" class="form-control" name="bar_or_restaurant">
-    <option value="bars">Bar</option>
-    <option value="restaurants">Restaurant</option>
-  </select>
-  <label for="time_before">Time before event</label>
-  <select id="time_before" class="form-control" name="time_before">
-    <option value="0.5">30 minutes</option>
-    <option value="1">1 hour</option>
-    <option value="1.5">1.5 hours</option>
-    <option value="2">2 hours</option>
-    <option value="2.5">2.5 hours</option>
-    <option value="3">3 hours</option>
-    <option value="3.5">3.5 hours</option>
-    <option value="4">4 hours</option>
-    <option value="4.5">4.5 hours</option>
-    <option value="5">5 hours</option>
-  </select>
-  <label for="distance">Distance from event</label>
-  <select id="distance" class="form-control" name="distance">
-    <option value="0.5">1/2 mile</option>
-    <option value="1">1 mile</option>
-    <option value="5">5 miles</option>
-    <option value="10">10 miles</option>
-  </select>
-  <br>
-  <input type="hidden" value='{{current_plan_id}}' id="plan_id">
-  <button type="submit" class="btn btn-default" id="submit_button">Submit</button>
-</form>
+<div id="loader" style="display:none;"></div>
 
-<div id="restaurant_options" class="container" hidden>
+<div id="restaurant_options" class="container animate-bottom" hidden>
   <div id="choosing-business-options" class="row">
     <div id="helpful-info-text" class="col-xs-9">
       <h4>Choose one:</h4>
@@ -145,6 +148,7 @@ function showChooseBusinesses(yelp_json){
   // Stores yelp json for all functions to access
   all_businesses = yelp_json;
 
+  $('#loader').hide();
   $('#restaurant_options').show();
 
   showBusinessesOptions(1);
@@ -200,7 +204,9 @@ function businessOptions(evt){
     'distance' : $('#distance').val()
   };
 
+  document.getElementById("loader").style.display = "block";
   $.post('/yelp.json', user_prefs, showChooseBusinesses);
+
 }
 
 // Button Event Listeners
