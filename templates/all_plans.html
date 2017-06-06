@@ -76,6 +76,7 @@
 
   <div id="past" class="tab-pane fade">
   {% for plan in past %}
+  <div class="past-plan">
       <h3>{{ plan.event_time.strftime('%x')}} {{plan.plan_name }}</h3>
       {% if (plan.food_name) and (plan.food_time) %}
       <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
@@ -96,6 +97,7 @@
         <p>{{invitees.first_name}} {{invitees.last_name}}</p>
       {% endif %}
       {% endfor %}
+  </div>
   {% endfor %}
   </div>
 
