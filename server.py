@@ -44,6 +44,7 @@ def get_yelp_bearer_token():
     url = '{0}{1}'.format(host, quote(path.encode('utf8')))
     response = requests.request("POST", url, data=data, headers=headers)
     bearer_token = response.json()['access_token']
+    print bearer_token
     return bearer_token
 
 
