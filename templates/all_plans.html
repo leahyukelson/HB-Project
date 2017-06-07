@@ -2,7 +2,6 @@
 {% block content %}
 
 
-</style>
 {% if (upcoming) or (past) %}
 <a href="/new-plan" class="btn btn-primary">Create New</a>
 <br><br>
@@ -116,48 +115,11 @@
 {% endif %}
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.js"></script>
-
 <script>
 "use strict";
-var options = {
-      responsive: true
-    };
 
-// Make Line Chart of event frequency by month
-var ctx_line = $("#lineChart").get(0).getContext("2d");
 
-$.get("/event-frequency.json", function (data) {
-      var myLineChart = Chart.Line(ctx_line, {
-                                    data: data,
-                                    options: options
-                                });
-});
-
-var decline_url;
-
-function decline_plan(evt) {
-  evt.preventDefault();
-
-  if (confirm("Are you sure you would no longer like to attend this plan?") == true) {
-      decline_url = this.value;
-      console.log(decline_url);
-      $.post(decline_url, {});
-      alert("This plan is no longer in your profile");
-  }
-}
-
-$(".decline_plan_btn").on("click", decline_plan);
-
-$(document).ready(function(){
-  $("#event-jchart").on("hide.bs.collapse", function(){
-    $("#chart-btn").html("Show Chart");
-  });
-  $("#event-jchart").on("show.bs.collapse", function(){
-    $("#chart-btn").html("Collapse Chart");
-  });
-});
-
+// Creates Google map for each upcoming plan using events coordinates as the center
 function initMap(){
    $(".upcoming-plan").each(function() {
       var plan_id = $(this).children(".plan-id").html();
@@ -171,6 +133,7 @@ function initMap(){
       var foodltLng = {lat: food_latitude, lng: food_longitude};
       var event_image = '/static/calendar.png'
       var food_image = '/static/fork.png'
+      
       var map = new google.maps.Map(document.getElementById("map"+plan_id), {
         zoom: 14,
         center: eventltLng,
@@ -178,6 +141,7 @@ function initMap(){
         mapTypeControl: false,
         streetViewControl: false
       });
+
       var eventMarker = new google.maps.Marker({
         position: eventltLng,
         map: map,
@@ -186,15 +150,14 @@ function initMap(){
       });
 
       if (food_name != "") {
-      var foodMarker = new google.maps.Marker({
-        position: foodltLng,
-        map: map,
-        title: food_name,
-        icon: food_image
-      });
-    }
-    }
-      );
+        var foodMarker = new google.maps.Marker({
+          position: foodltLng,
+          map: map,
+          title: food_name,
+          icon: food_image
+        });
+      }
+    });
 }
 
 </script>

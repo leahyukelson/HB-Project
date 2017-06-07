@@ -599,7 +599,7 @@ def delete_plan_forever(plan_id):
         db.session.delete(plan)
         db.session.commit()
 
-        flash(plan.plan_name + " Plan has been deleted")
+        flash(plan.plan_name + "has been deleted")
 
         return redirect('/profile')
     else:
@@ -625,6 +625,7 @@ def decline_plan(plan_id):
 @app.route('/event-frequency.json')
 @login_required
 def generate_chart_data():
+    """ Uses user's plan data to create the data for a JS Chart """
     data_dict = {"datasets": [
                                 {
                                     "label": "Events per Month",
@@ -638,6 +639,7 @@ def generate_chart_data():
     current_user = User.query.filter_by(email=session['current_user']).first()
     plans = current_user.plans
 
+    # Tallies the amount of plans for each month
     for plan in plans:
         data_dict['datasets'][0]['data'][int(plan.event_time.month)-1] += 1
 
@@ -654,7 +656,4 @@ if __name__ == "__main__":
 
     app.yelp_bearer_token = 'WllJxLDGOspRQnGbwsoqd9CFqeW8_LshxaRo1WZXWbTJ5-zCePPbNwW61x1NCJiX9-RIh7KMiP-3l7RxJtrqnczHAILypbXeduWluvi3zK0OTUorLHk_9E3TbIMTWXYx'
 
-
-    # Use the DebugToolbar
-    # DebugToolbarExtension(app)
     app.run(port=5000, host='0.0.0.0')
