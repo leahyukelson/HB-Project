@@ -139,7 +139,7 @@ def fill_example_data():
 
     # Plan with food component
     plan2 = Plan(plan_user_creator=2, plan_name="Night Out", event_name="Concert", 
-                event_time="2018-10-03 21:30:00", event_location="Greek Theater", event_address="2001 Gayley Rd.", event_city="Berkeley",
+                event_time="2018-10-03 21:30:00", event_location="Roman Theater", event_address="2001 Gayley Rd.", event_city="Berkeley",
                 event_state="CA", event_zipcode="94720", food_time="2018-10-03 20:00:00", food_name="Smoke's Poutinerie", food_address="2518 Durant Ave",
                 food_city="Berkeley", food_state="CA", food_zipcode="94704")
 

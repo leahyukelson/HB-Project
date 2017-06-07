@@ -369,7 +369,7 @@ class NightPlanTests(unittest.TestCase):
                                     'event_name': 'Drake Concert',
                                     'event_date': '2018-10-03',
                                     'event_time': '20:00',
-                                    'location': 'Greek Theater',
+                                    'location': 'Roman Theater',
                                     'number': '2001',
                                     'street' : 'Gayley Rd.',
                                     'state' : 'CA',
@@ -438,7 +438,6 @@ class NightPlanTests(unittest.TestCase):
 
     def test_edit_plan_no_access(self):
         """ Test for attempting to edit a plan that user does not own """
-
         # Load in user2 (with plans) into session
         with self.client as c:
             with c.session_transaction() as session:
@@ -450,6 +449,95 @@ class NightPlanTests(unittest.TestCase):
         self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
         self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")
 
+    def test_add_friends_form(self):
+        """ Test the adding friends form """
+        
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.get('/add-friends/1', follow_redirects=True)
+
+        self.assertIn("First Name", result.data)
+        self.assertNotIn("Plans", result.data)
+
+    def test_more_add_friends(self):
+        """ Test the adding more friends form """
+        
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.get('/add-more-friends/2', follow_redirects=True)
+
+        self.assertIn("First Name", result.data)
+        self.assertNotIn("Plans", result.data)
+
+
+    def test_add_friends(self):
+        """ Test adding friends updates database and profile page"""
+
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.post('/add-friends/1',
+                                    data={'fname1': 'Kim',
+                                          'lname1': 'Kardashian',
+                                           'email1': 'kimk@gmail.com',
+                                           'phone1': '3451234567'},
+                                    follow_redirects=True)
+
+        # Check friend was added to profile page
+        self.assertIn("Kim Kardashian", result.data)
+
+        plan = Plan.query.get(1)
+        self.assertIn("Kim", plan.invitees[0].first_name)
+
+
+    def test_add_friends_redirect(self):
+        """ Test that add friends redirects to profile if friends have already been added """
+
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.get('/add-friends/2', follow_redirects=True)
+
+        # Check to see whether page redirect to profile instead of add friends page
+        self.assertIn("Plans", result.data)
+        self.assertIn("Night Out", result.data)
+        self.assertNotIn("First Name", result.data)
+
+    def test_delete_plan_form(self):
+        """ Test deletion confirmation page """
+
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.get('/delete-plan/2', follow_redirects=True)
+
+        self.assertIn("Are you sure", result.data)
+        self.assertNotIn("Plans", result.data)
+
+    def test_delete_plan(self):
+        """ Test plan deletion, plan will no longer appear in user's profile """
+
+        # Load in user2 (with plans) into session
+        with self.client as c:
+            with c.session_transaction() as session:
+                session['current_user'] = "sally@gmail.com"
+
+        result = self.client.post('/delete-plan/2', follow_redirects=True)
+
+        self.assertIn("has been deleted", result.data)
+        self.assertNotIn("Roman Theater", result.data)
 
 
 if __name__ == "__main__":
