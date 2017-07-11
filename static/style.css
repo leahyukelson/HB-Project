@@ -1,4 +1,11 @@
 /* Overall Formatting */
+/* Cursive font: */
+/* Sans serif font: */
+/* Navy: */
+/* Orange: */
+/* Dark Gray: */
+/* Light Gray: */ 
+
 html {
   font-family: 'Playfair Display', serif;
 }
@@ -6,6 +13,46 @@ html {
 h2{
   font-family: 'Roboto Condensed', sans-serif;
   font-size: 30px;
+}
+
+
+/* Homepage */
+.homepage {
+    background-image: url("/static/sf-night.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 5%;
+    padding-left: 15%;
+    padding-right: 15%;
+}
+
+.night {
+  font-family: 'Pacifico', cursive;
+}
+
+.out {
+  font-family: 'Questrial', sans-serif;
+}
+
+.night-out-header{
+  text-align: center;
+  font-size: 48px;
+  color: white;
+}
+
+.home-blurb {
+  text-align: center;
+  color: white;
+  font-family: 'Questrial', sans-serif;
+}
+
+.btn-started{
+  background-color: #ffe66d;
+  color: #1a535c;
+}
+
+.start-btn{
+  text-align: center;
 }
 
 .btn-default {
@@ -30,6 +77,13 @@ h2{
 #create-account-submit {
     text-align: center;
 }
+
+/* Navbar */
+.navbar-collapse {
+
+}
+
+
 
 /* Profile */
 .options {

@@ -15,9 +15,6 @@ function decline_plan() {
     }
 }
 
-$(document).ready(function(){
-    // Make Line Chart of event frequency by month
-    var ctx_line = $("#lineChart").get(0).getContext("2d");
 
     // Options for Chart JS
     var options = {
@@ -39,7 +36,7 @@ $(document).ready(function(){
     $("#event-jchart").on("show.bs.collapse", function(){
         $("#chart-btn").html("Collapse Chart");
     });
-});
+
 
 // ~~~~~~~~~~~~~~~ Add/ Edit Plan ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
