@@ -246,6 +246,65 @@ def user_profile():
     current_user_id = current_user.user_id
     return render_template('all_plans.html', upcoming=upcoming, past=past, current_user=current_user_id)
 
+@app.route('/upcoming')
+@login_required
+def upcoming_plans():
+    """ Dashboard for all user's upcoming plans 
+
+    Orders plans by time
+    """
+
+    # Query database for all plans for a logged-in user
+    current_user = User.query.filter_by(email=session['current_user']).first()
+    plans = current_user.plans
+
+    upcoming = []
+    now = datetime.datetime.now()
+
+    # Distinguish between plans that are before and after now (based on datetime)
+    for plan in plans:
+        if plan.event_time >= now:
+            upcoming.append(plan)
+
+    # MergeSort upcoming and past plans by date
+    upcoming = mergesort_plans_by_date(upcoming)
+
+    current_user_id = current_user.user_id
+    return render_template('upcoming.html', upcoming=upcoming, current_user=current_user_id)
+
+@app.route('/past')
+@login_required
+def past_plans():
+    """ Dashboard for all user's past plans 
+
+    Orders plans by time to show past and current plans in profile
+    """
+
+    # Query database for all plans for a logged-in user
+    current_user = User.query.filter_by(email=session['current_user']).first()
+    plans = current_user.plans
+
+    past = []
+    now = datetime.datetime.now()
+
+    # Distinguish between plans that are before and after now (based on datetime)
+    for plan in plans:
+        if plan.event_time < now:
+            past.append(plan)
+
+    # MergeSort upcoming and past plans by date
+    plans = mergesort_plans_by_date(past)
+
+    current_user_id = current_user.user_id
+    return render_template('past.html', past=past[::-1], current_user=current_user_id)
+
+
+@app.route('/analytics')
+@login_required
+def user_analytics():
+    """ Shows a user their chart.js on how many plans per month they have scheduled """
+    return render_template("analytics.html")
+
 
 @app.route('/new-plan')
 @login_required

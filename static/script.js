@@ -29,14 +29,6 @@ function decline_plan() {
                                     });
     });
 
-    // Buttons to show or collapse chart within Analytics tab
-    $("#event-jchart").on("hide.bs.collapse", function(){
-        $("#chart-btn").html("Show Chart");
-    });
-    $("#event-jchart").on("show.bs.collapse", function(){
-        $("#chart-btn").html("Collapse Chart");
-    });
-
 
 // ~~~~~~~~~~~~~~~ Add/ Edit Plan ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

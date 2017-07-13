@@ -6,6 +6,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed|Playfair+Display" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Pacifico|Questrial" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.js"></script>
 </head>
@@ -14,14 +15,17 @@
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
             {% if 'current_user' in session %}
-                <li><a href="/profile">My Profile - {{session['current_user']}}</a></li>
-                <li><a href="/logout">Log Out</a></li>
+                <li><a class="nav" href="/new-plan">New</a></li>
+                <li><a class="nav" href="/upcoming">Upcoming</a></li>
+                <li><a class="nav" href="/past">Past</a></li>
+                <li><a class="nav" href="/analytics">Analytics</a></li>
+                <li><a class="nav" href="/logout">Log Out</a></li>
             {% else %}
-                <li><a href="/login-form">Log In</a></li>
-                <li><a href="/create-account">Create Account</a></li>
+                <li><a class="nav" href="/login-form">Log In</a></li>
+                <li><a class="nav" href="/create-account">Create Account</a></li>
             {% endif %}
         </ul>
-        <ul class="nav navbar-nav nabar-left"><a href="/"><img src="/static/nightout_t.png" alt="Night Out"></a></ul>
+        <ul class="nav navbar-nav navbar-left night-out-nav"><span class="night">night</span><span class="out">OUT</span></a></ul>
     </div>
 
 

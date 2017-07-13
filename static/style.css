@@ -1,13 +1,19 @@
 /* Overall Formatting */
-/* Cursive font: */
-/* Sans serif font: */
-/* Navy: */
-/* Orange: */
-/* Dark Gray: */
-/* Light Gray: */ 
+
+/* Cursive font: 'Pacifico', cursive;*/
+/* Sans serif font: 'Questrial', sans-serif;*/
+/* Navy:  #2f4550;*/
+/* Cream: #f7fff7;*/
+/* Orange: #ffe66d;*/
+/* Gray: #586f7c; */
+/* Light Blue: #b8dbd9; */ 
 
 html {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Questrial', sans-serif;
+}
+
+body {
+  background-color: #f7fff7;
 }
 
 h2{
@@ -15,6 +21,36 @@ h2{
   font-size: 30px;
 }
 
+.btn-default {
+  background-color: #30323D;
+  color: #FFF; 
+}
+
+.btn-primary {
+  background-color: #586f7c;
+}
+
+.btn-danger{
+  background-color: #ff6b6b;
+}
+
+.form {
+    background: #FFFF99;
+    padding: 5%;
+    border-radius: 4px;
+    box-shadow: 6px 6px 10px 0px rgba(138,130,138,.5);
+    margin: 8%;
+    height: 40%;
+}
+
+.in-heading {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 30px;
+}
+
+#create-account-submit {
+    text-align: center;
+}
 
 /* Homepage */
 .homepage {
@@ -37,52 +73,37 @@ h2{
 .night-out-header{
   text-align: center;
   font-size: 48px;
-  color: white;
+  color: #f7fff7;
 }
 
 .home-blurb {
   text-align: center;
-  color: white;
+  color: #f7fff7;
   font-family: 'Questrial', sans-serif;
 }
 
 .btn-started{
   background-color: #ffe66d;
-  color: #1a535c;
+  color: #2f4550;
 }
 
 .start-btn{
   text-align: center;
 }
 
-.btn-default {
-  background-color: #30323D;
-  color: #FFF; 
-}
-
-.form {
-    background: #FFFF99;
-    padding: 5%;
-    border-radius: 4px;
-    box-shadow: 6px 6px 10px 0px rgba(138,130,138,.5);
-    margin: 8%;
-    height: 40%;
-}
-
-.in-heading {
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 30px;
-}
-
-#create-account-submit {
-    text-align: center;
-}
-
 /* Navbar */
-.navbar-collapse {
-
+.night-out-nav{
+  font-size: 28px;
 }
 
+.navbar-collapse{
+  background-color: #2f4550;
+  color: #f7fff7;
+}
+
+.nav{
+  color: #f7fff7;
+}
 
 
 /* Profile */

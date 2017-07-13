@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div id="analytics">
+    <div id="event-jchart" class="event-chart collapse in">
+      <canvas id="lineChart" width="60" height="30"></canvas>
+      <div id="lineLegend" class="chart-legend"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+    // Make Line Chart of event frequency by month
+    var ctx_line = $("#lineChart").get(0).getContext("2d");
+
+</script> 
+
+{% endblock %}   

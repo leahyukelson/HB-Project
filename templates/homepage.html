@@ -10,15 +10,8 @@
 
 <body class="homepage">
     <h1 class="night-out-header"><span class="night">night</span><span class="out">OUT</span></h1>
-    {% if 'current_user' in session %}
-    <h2>Event Plans</h2>
-    <p><a href="/profile" class="btn btn-primary">See upcoming plans</a><p>
-    <p><a href="/new-plan" class="btn btn-primary">Add a new event plan</a></p>
-
-    {% else %}
-        <p class="home-blurb">Night Out lets you plan a fun night out with friends - start at a concert, comedy show, or any other event and choose a restaurant or bar to meet your friends before! Everyone gets an email with the plan so no more frantic last minute texting.</p>
-        <p class="start-btn"><a href="/create-account" class="btn btn-primary btn-started">Get Started!</a></p>
-    {% endif %}
+    <p class="home-blurb">Night Out lets you plan a fun night out with friends - start at a concert, comedy show, or any other event and choose a restaurant or bar to meet your friends before! Everyone gets an email with the plan so no more frantic last minute texting.</p>
+    <p class="start-btn"><a href="/create-account" class="btn btn-primary btn-started">Get Started!</a></p>
 </body>
 
 </html>

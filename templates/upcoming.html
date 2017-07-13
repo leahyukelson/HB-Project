@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if upcoming %}
+  <div id="upcoming">
+  <div class="container">
+  {% for plan in upcoming %}
+  <div class="plan-info-and-map row">
+  <div class="upcoming-plan col-xs-6">
+      <h3>{{ plan.event_time.strftime('%a, %B %-d, %Y')}}</h3>
+      <h2>{{plan.plan_name }}</h2>
+      {% if (plan.food_name) and (plan.food_time) %}
+      <h4>{{ plan.food_time.strftime('%-I:%M %p')}}: {{plan.food_name}}</h4>
+        <p class="bus-address">{{plan.food_address}}</p>
+        <p class="bus-address2">{{plan.food_city}}, {{plan.food_state}} {{plan.food_zipcode}}</p>
+        <p class="plan-id" hidden>{{plan.plan_id}}</p>
+        <p class="food-name" hidden>{{plan.food_name}}</p>
+        <p class="food-longitude" hidden>{{plan.food_longitude}}</p>
+        <p class="food-latitude" hidden>{{plan.food_latitude}}</p>  
+      {% endif %}
+      <h4>{{plan.event_time.strftime('%-I:%M %p') }}: {{plan.event_name}}</h4>
+        {% if plan.event_location %}
+        <p>{{plan.event_location}}</p>
+        {% endif %}
+        <p class="plan-address">{{plan.event_address}}</p>
+        <p class="plan-address2">{{plan.event_city}}, {{plan.event_state}} {{plan.event_zipcode}}
+        <p class="event-name" hidden>{{plan.event_name}}</p>
+        <p class="event-longitude" hidden>{{plan.event_longitude}}</p>
+        <p class="event-latitude" hidden>{{plan.event_latitude}}</p>  
+      {% if plan.invitees %}
+      <h4>Friends Invited:</h4>
+      {% endif %}
+      {% for invitees in plan.invitees %}
+        {% if not invitees.email == session['current_user']  %}
+        <p>{{invitees.first_name}} {{invitees.last_name}}</p>
+      {% endif %}
+      {% endfor %}
+      {% if plan.invitees|length == 1 %}
+        {% if plan.invitees[0].email == session['current_user'] %}
+        <p>Just you!</p>
+        {% endif %}
+      {% endif %}
+      {% if plan.plan_user_creator == current_user %}
+    <div class="dropdown options">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Edit Plan
+      <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="/edit-plan/{{plan.plan_id}}">Edit Event</a></li>
+        <li><a href="/choose-restaurant/{{plan.plan_id}}">Edit Restaurant/ Bar</a></li>
+        <li><a href="/add-more-friends/{{plan.plan_id}}">Add Friends</a></li>
+        <li><a href="/decline-plan/{{plan.plan_id}}">Decline Plan</a></li>
+      </ul>
+      </div>
+    <a href="/delete-plan/{{plan.plan_id}}" class="btn btn-danger">Delete Plan</a>
+      {% endif %}
+    </div>
+    <div class="map-col col-xs-6 aligncenter">
+    <div class="google-map" id="map{{plan.plan_id}}"></div>
+    </div>
+  </div>
+  {% endfor %}
+  </div>
+  </div>
+
+{% else %}
+
+  <h2> You have no plans yet! </h2>
+  <p class="start-btn"><a href="/create-account" class="btn btn-primary btn-started">Get Started!</a></p>
+
+{% endif %}
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4vEycjJ1g4LUHzhfZfi0qAfMlWt3jRX8&libraries=places&callback=initMap"
+        async defer></script>
+
+{% endblock %}
