@@ -120,7 +120,7 @@ def plan_access(plan_id):
 def index():
     """Homepage."""
     if 'current_user' in session:
-        return redirect('/profile')
+        return redirect('/upcoming')
     return render_template("homepage.html")
 
 
@@ -176,7 +176,7 @@ def create_new_user():
         session['current_user'] = user_email
         flash('You are now registered and logged in!')
 
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 @app.route('/logout')
 def logout():
@@ -205,7 +205,7 @@ def check_login():
         if bcrypt.checkpw(user_password.encode('utf8'), user.password.encode('utf8')):
             session['current_user'] = user_email
             flash('You are now logged in!')
-            return redirect('/profile')
+            return redirect('/upcoming')
         else:
             flash('Wrong password!')
             return redirect('/login-form')
@@ -216,7 +216,7 @@ def check_login():
         return redirect('/create-account')
 
 
-@app.route('/profile')
+@app.route('/upcoming')
 @login_required
 def user_profile():
     """ Dashboard for all user's plans 
@@ -269,8 +269,12 @@ def upcoming_plans():
     # MergeSort upcoming and past plans by date
     upcoming = mergesort_plans_by_date(upcoming)
 
+    if upcoming:    
+        first_plan = upcoming[0]
+        upcoming = upcoming[1:]
+
     current_user_id = current_user.user_id
-    return render_template('upcoming.html', upcoming=upcoming, current_user=current_user_id)
+    return render_template('upcoming.html', first_plan=first_plan, upcoming=upcoming, current_user=current_user_id)
 
 @app.route('/past')
 @login_required
@@ -388,7 +392,7 @@ def edit_plan(plan_id):
         return render_template('edit_plan.html', plan=plan, plan_date=plan_date, plan_time=plan_time)
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/edit-plan/<plan_id>', methods=['POST'])
@@ -446,12 +450,12 @@ def edit_event_plan(plan_id):
         db.session.commit()
 
         if different_location == False:
-            return redirect('/profile')
+            return redirect('/upcoming')
         else:
             return redirect('/choose-restaurant/'+str(plan.plan_id))
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/yelp.json', methods=["POST"])
@@ -515,7 +519,7 @@ def choose_restaurant():
         return jsonify(businesses)
     except:
         flash("Something went wrong! Please try again later.")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/choose-restaurant/<plan_id>')
@@ -526,7 +530,7 @@ def customize_restaurant(plan_id):
         return render_template("customize_business.html", current_plan_id=plan_id)
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/choose-restaurant/<plan_id>', methods=['POST'])
@@ -556,10 +560,10 @@ def add_plan_restaurant(plan_id):
 
         except:
             flash("Something went wrong. Please try again later.")
-            return redirect('/profile')
+            return redirect('/upcoming')
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/add-friends/<plan_id>')
@@ -571,13 +575,13 @@ def add_friends(plan_id):
 
         # If user got re-directed here through editing restaurant, take back to profile
         if plan.invitees:
-            return redirect('/profile')
+            return redirect('/upcoming')
 
         else:
             return render_template("add_friends.html", plan=plan)
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/add-more-friends/<plan_id>')
@@ -590,7 +594,7 @@ def add_more_friends(plan_id):
 
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/add-friends/<plan_id>', methods=['POST'])
@@ -628,11 +632,11 @@ def add_invitees(plan_id):
                 
                 db.session.commit()
 
-        return redirect ('/profile')
+        return redirect ('/upcoming')
 
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/delete-plan/<plan_id>')
@@ -645,7 +649,7 @@ def delete_plan_ask(plan_id):
 
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/delete-plan/<plan_id>', methods=['POST'])
@@ -660,10 +664,10 @@ def delete_plan_forever(plan_id):
 
         flash(plan.plan_name + "has been deleted")
 
-        return redirect('/profile')
+        return redirect('/upcoming')
     else:
         flash("You don't have edit access to this plan")
-        return redirect('/profile')
+        return redirect('/upcoming')
 
 
 @app.route('/decline-plan/<plan_id>', methods=['POST'])
@@ -679,7 +683,7 @@ def decline_plan(plan_id):
     
     db.session.commit()
 
-    return redirect('/profile')
+    return redirect('/upcoming')
 
 @app.route('/event-frequency.json')
 @login_required

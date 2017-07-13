@@ -15,6 +15,8 @@ function decline_plan() {
     }
 }
 
+    // Make Line Chart of event frequency by month
+    var ctx_line = $("#lineChart").get(0).getContext("2d");
 
     // Options for Chart JS
     var options = {
@@ -48,4 +50,46 @@ function geolocate() {
       autocomplete.setBounds(circle.getBounds());
     });
   }
+}
+
+// ~~~~~~~~~~~~~~~ Upcoming Plans ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Creates Google map for upcoming plan using events coordinates as the center
+function initMap() {
+
+      var plan_id = $("#first-plan").children(".plan-id").html();
+      var event_name = $("#first-plan").children(".event-name").html();
+      var event_latitude = parseFloat($("#first-plan").children(".event-latitude").html());
+      var event_longitude = parseFloat($("#first-plan").children(".event-longitude").html());
+      var food_name = $("#first-plan").children(".food-name").html();
+      var food_latitude = parseFloat($("#first-plan").children(".food-latitude").html());
+      var food_longitude = parseFloat($("#first-plan").children(".food-longitude").html());
+      var eventltLng = {lat: event_latitude, lng: event_longitude};
+      var foodltLng = {lat: food_latitude, lng: food_longitude};
+      var event_image = '/static/calendar.png'
+      var food_image = '/static/fork.png'
+      
+      var map = new google.maps.Map(document.getElementById("plan-map"), {
+        zoom: 14,
+        center: eventltLng,
+        gestureHandling: 'cooperative',
+        mapTypeControl: false,
+        streetViewControl: false
+      });
+
+      var eventMarker = new google.maps.Marker({
+        position: eventltLng,
+        map: map,
+        title: event_name,
+        icon: event_image
+      });
+
+      if (food_name != "") {
+        var foodMarker = new google.maps.Marker({
+          position: foodltLng,
+          map: map,
+          title: food_name,
+          icon: food_image
+        });
+      }
 }
