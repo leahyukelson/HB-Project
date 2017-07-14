@@ -27,13 +27,12 @@ class NewUserTests(unittest.TestCase):
         """ Test that homepage has log in and new profile access"""
         result = self.client.get("/")
         self.assertIn("Night Out", result.data)
-        self.assertIn("Create Account", result.data)
+        self.assertIn("Get Started", result.data)
         self.assertNotIn("Profile", result.data) 
 
     def test_create_account_form(self):
         """ Test that create account page is running with correct form """
         result = self.client.get("/create-account")
-        self.assertIn("Create Account", result.data)
         self.assertIn("submit", result.data)
         self.assertNotIn("Profile", result.data)
 
@@ -48,11 +47,9 @@ class NewUserTests(unittest.TestCase):
                                     'last_name': 'Ray'},
                               follow_redirects=True)
         self.assertIn("now registered and logged in", result.data)
-        self.assertIn("Create one now!", result.data)
+        self.assertIn("Get Started!", result.data)
         self.assertIn("Log Out", result.data)
-        self.assertIn("Profile", result.data)
         self.assertNotIn("Log In", result.data)
-        self.assertNotIn("Create Account", result.data)
 
         # Check user is correctly input in database
         new_user = User.query.filter_by(email='rachel@gmail.com').one()
@@ -69,7 +66,7 @@ class NewUserTests(unittest.TestCase):
                               follow_redirects=True)
 
         # User has profile with no plans, and a link to create plans
-        result = self.client.get('/profile')
+        result = self.client.get('/upcoming')
         self.assertIn("no plans", result.data)
         self.assertIn("/new-plan", result.data, 'No link to create new plan')
 
@@ -110,9 +107,8 @@ class NewUserTests(unittest.TestCase):
 
     def test_no_user_profile(self):
         """ Test that profile page redirects to log-in for a user not logged in """
-        result = self.client.get('/profile', follow_redirects=True)
+        result = self.client.get('/upcoming', follow_redirects=True)
         self.assertIn("Log In", result.data, 'Page did not redirect')
-        self.assertNotIn("Plans", result.data, 'Page did not redirect')
 
 
 class NightPlanTests(unittest.TestCase):
@@ -161,9 +157,7 @@ class NightPlanTests(unittest.TestCase):
                                       'password': 'word'},
                                 follow_redirects=True)
         self.assertIn("Log Out", result.data)
-        self.assertIn("Profile", result.data)
         self.assertNotIn("Log In", result.data)
-        self.assertNotIn("Create Account", result.data)
 
 
     def test_wrong_password(self):
@@ -184,7 +178,6 @@ class NightPlanTests(unittest.TestCase):
                                 follow_redirects=True)
 
         self.assertIn("No user with that email", result.data)
-        self.assertIn("Create Account", result.data)
         self.assertNotIn("You are now logged in!", result.data)
 
     def test_user_previously_invited(self):
@@ -211,7 +204,7 @@ class NightPlanTests(unittest.TestCase):
                 session['current_user'] = "rachel@gmail.com"
 
         # User has profile with no plans, and a link to create plans
-        result = self.client.get('/profile')
+        result = self.client.get('/upcoming')
         self.assertIn("no plans", result.data)
         self.assertIn("/new-plan", result.data)
 
@@ -223,8 +216,7 @@ class NightPlanTests(unittest.TestCase):
             with c.session_transaction() as session:
                 session['current_user'] = "sally@gmail.com"
 
-        result = self.client.get('/profile')
-        self.assertIn("Plans", result.data)
+        result = self.client.get('/upcoming')
         self.assertIn("Concert", result.data)
         self.assertIn("October 3, 2018", result.data)
 
@@ -380,7 +372,6 @@ class NightPlanTests(unittest.TestCase):
                               follow_redirects=True)
 
         # Check that page redirected to profile since location is unchanged
-        self.assertIn("Plans", result.data)
         self.assertIn("Birthday", result.data)
         self.assertNotIn("Meet at", result.data, "Page re-directed to restaurant choosing")
 
@@ -432,7 +423,6 @@ class NightPlanTests(unittest.TestCase):
 
         result = self.client.get('/edit-plan/16', follow_redirects=True)
         self.assertIn("You don&#39;t have edit access to this plan", result.data)
-        self.assertIn("Plans", result.data)
         self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
         self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")
 
@@ -445,7 +435,6 @@ class NightPlanTests(unittest.TestCase):
 
         result = self.client.get('/edit-plan/3', follow_redirects=True)
         self.assertIn("You don&#39;t have edit access to this plan", result.data)
-        self.assertIn("Plans", result.data)
         self.assertNotIn("Event name:", result.data, "Showing form for nonexistant plan")
         self.assertNotIn("Event Location Name:", result.data, "Showing form for nonexistant plan")
 
@@ -460,7 +449,6 @@ class NightPlanTests(unittest.TestCase):
         result = self.client.get('/add-friends/1', follow_redirects=True)
 
         self.assertIn("First Name", result.data)
-        self.assertNotIn("Plans", result.data)
 
     def test_more_add_friends(self):
         """ Test the adding more friends form """
@@ -473,7 +461,6 @@ class NightPlanTests(unittest.TestCase):
         result = self.client.get('/add-more-friends/2', follow_redirects=True)
 
         self.assertIn("First Name", result.data)
-        self.assertNotIn("Plans", result.data)
 
 
     def test_add_friends(self):
@@ -509,7 +496,6 @@ class NightPlanTests(unittest.TestCase):
         result = self.client.get('/add-friends/2', follow_redirects=True)
 
         # Check to see whether page redirect to profile instead of add friends page
-        self.assertIn("Plans", result.data)
         self.assertIn("Night Out", result.data)
         self.assertNotIn("First Name", result.data)
 
@@ -524,7 +510,6 @@ class NightPlanTests(unittest.TestCase):
         result = self.client.get('/delete-plan/2', follow_redirects=True)
 
         self.assertIn("Are you sure", result.data)
-        self.assertNotIn("Plans", result.data)
 
     def test_delete_plan(self):
         """ Test plan deletion, plan will no longer appear in user's profile """

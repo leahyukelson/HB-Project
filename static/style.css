@@ -64,10 +64,12 @@ h2{
 
 .night {
   font-family: 'Pacifico', cursive;
+  color: #f7fff7;
 }
 
 .out {
   font-family: 'Questrial', sans-serif;
+  color: #f7fff7;
 }
 
 .night-out-header{

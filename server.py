@@ -215,37 +215,6 @@ def check_login():
         flash("No user with that email")
         return redirect('/create-account')
 
-
-@app.route('/upcoming')
-@login_required
-def user_profile():
-    """ Dashboard for all user's plans 
-
-    Orders plans by time to show past and current plans in profile
-    """
-
-    # Query database for all plans for a logged-in user
-    current_user = User.query.filter_by(email=session['current_user']).first()
-    plans = current_user.plans
-
-    upcoming = []
-    past = []
-    now = datetime.datetime.now()
-
-    # Distinguish between plans that are before and after now (based on datetime)
-    for plan in plans:
-        if plan.event_time >= now:
-            upcoming.append(plan)
-        else:
-            past.append(plan)
-
-    # MergeSort upcoming and past plans by date
-    upcoming = mergesort_plans_by_date(upcoming)
-    plans = mergesort_plans_by_date(past)
-
-    current_user_id = current_user.user_id
-    return render_template('all_plans.html', upcoming=upcoming, past=past, current_user=current_user_id)
-
 @app.route('/upcoming')
 @login_required
 def upcoming_plans():
@@ -268,13 +237,15 @@ def upcoming_plans():
 
     # MergeSort upcoming and past plans by date
     upcoming = mergesort_plans_by_date(upcoming)
+    first_plan = []
 
     if upcoming:    
         first_plan = upcoming[0]
         upcoming = upcoming[1:]
-
+        
     current_user_id = current_user.user_id
     return render_template('upcoming.html', first_plan=first_plan, upcoming=upcoming, current_user=current_user_id)
+
 
 @app.route('/past')
 @login_required
