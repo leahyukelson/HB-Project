@@ -56,7 +56,7 @@
   </div>
   </div>
   <form id="add_restaurant_plan" action="/choose-restaurant/{{ current_plan_id}}" method="POST">
-    <div id="business_buttons"></div>
+    <div id="business_buttons" class="text-center"></div>
     <div id="pagination-buttons">
       <ul class="pagination">
         <li value="1" id="buspg1" class="active buspg"><a>1</a></li>
@@ -82,7 +82,6 @@
 {% endif %}
 
 <script>
-"use strict";
 
 var all_businesses;
 var prevPage = 1;
@@ -218,6 +217,5 @@ $("#sortrating").on("click", function() {sortBusiness('rating');});
 $("#sortdistance").on("click", function() {sortBusiness('distance');});
 
 </script>
-
 
 {% endblock %}

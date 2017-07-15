@@ -2,11 +2,7 @@
 {% block content %}
 
 {% if 'current_user' in session %}
-    {% if plan.invitees %}
-    <h2 class="h2">Add up to {{12 - plan.invitees|length}} more friends</h2>
-    {% else %}
-    <h2 class="h2">Add up to 12 friends</h2>
-    {% endif %}
+    <h2>Add Friends</h2>
     <form id="add_friends_plan" class="form-inline" action="/add-friends/{{plan.plan_id }}" method="POST">
     {% for friend in range(12- plan.invitees|length) %}
       <div class="form-group">
