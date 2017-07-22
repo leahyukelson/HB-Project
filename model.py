@@ -196,6 +196,6 @@ if __name__ == "__main__":
     # you in a state of being able to work with the database directly.
 
     from server import app
-    connect_to_db(app, 'postgresql:///test_plans')
+    connect_to_db(app, 'postgresql:///event_plans')
     print "Connected to DB."
     db.create_all()
