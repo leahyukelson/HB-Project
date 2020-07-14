@@ -52,7 +52,7 @@ Clone or fork this repo:
 https://github.com/leahyukelson/Night-Out
 ```
 
-Create and activate a virtual environment inside your LaterGator directory:
+Create and activate a virtual environment inside your Night Out directory:
 
 ```
 virtualenv env
