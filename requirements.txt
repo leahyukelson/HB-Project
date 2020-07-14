@@ -16,7 +16,7 @@ psycopg2==2.7.1
 pycparser==2.17
 pyparsing==2.2.0
 python-http-client==2.2.1
-requests==2.14.2
+requests==2.20.0
 sendgrid==4.1.0
 six==1.10.0
 SQLAlchemy==1.1.7
